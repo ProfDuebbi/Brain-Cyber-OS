@@ -212,6 +212,15 @@
             </svg>
         );
 
+        // --- NEUES ICON FÜR EXCHANGE ---
+        const BarChartIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <line x1="12" y1="20" x2="12" y2="10"></line>
+                <line x1="18" y1="20" x2="18" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="16"></line>
+            </svg>
+        );
+
         // ==========================================
         // 1. KONFIGURATION & DATENBANKEN
         // ==========================================
@@ -251,7 +260,8 @@
         ];
 
         const CHANGELOG_DATA = [
-            { version: "v2.4.0", date: "AKTUELL", changes: ["Dynamische Gigs (Belohnungen in Krypto & CR) hinzugefügt", "Risiko-Faktor & Polizei-Strafensystem implementiert", "NCPD Polizeiakte-App integriert"] },
+            { version: "v2.5.0", date: "AKTUELL", changes: ["Nexus Exchange App implementiert", "NetRunner von Trading-Funktionen getrennt", "Advanced Trading UI hinzugefügt"] },
+            { version: "v2.4.0", date: "ARCHIV", changes: ["Dynamische Gigs (Belohnungen in Krypto & CR) hinzugefügt", "Risiko-Faktor & Polizei-Strafensystem implementiert", "NCPD Polizeiakte-App integriert"] },
             { version: "v2.3.0", date: "ARCHIV", changes: ["ShadowBoard App (Gigs & Missionen) hinzugefügt", "SmartCam App (Echtzeit-Wohnungsvisualisierung) integriert"] },
             { version: "v2.2.0", date: "ARCHIV", changes: ["SecureMail Client integriert", "Dynamische OS-Versionsanzeige implementiert", "Story-Mails von E.V.A. hinzugefügt"] },
             { version: "v2.1.0", date: "ARCHIV", changes: ["Systemweite OS-Benachrichtigungen (Push) implementiert", "Changelog-Archiv in System-App integriert"] },
@@ -717,9 +727,7 @@
         };
 
         const CryptoApp = ({ playerState, setPlayerState, addNotification }) => {
-            const [activeTab, setActiveTab] = useState('MINE'); 
             const [selectedCrypto, setSelectedCrypto] = useState('NNC');
-            const [marketSelectedCoin, setMarketSelectedCoin] = useState('NNC');
             const [logs, setLogs] = useState([]);
             const logsEndRef = useRef(null);
             const heat = playerState.gpuHeat || 0;
@@ -789,107 +797,232 @@
                 }
             };
 
-            const handleTrade = (cryptoId, action, amount) => {
-                const currentPrice = playerState.market?.[cryptoId]?.price || CRYPTO_TYPES[cryptoId].value;
-                const availableCrypto = playerState.inventory[cryptoId];
-                if (action === 'SELL' && availableCrypto > 0) {
-                    const amountToSell = amount === 'ALL' ? availableCrypto : Math.min(availableCrypto, amount);
-                    setPlayerState(prev => ({ ...prev, credits: prev.credits + (amountToSell * currentPrice), inventory: { ...prev.inventory, [cryptoId]: Number((prev.inventory[cryptoId] - amountToSell).toFixed(2)) } }));
+            return (
+                <div className="flex flex-col h-full font-mono">
+                    <div className="flex border-b border-slate-800 mb-4 flex-shrink-0 p-2 bg-slate-900/50 items-center justify-between">
+                        <span className="flex items-center gap-2 text-cyan-400 font-bold"><CpuIcon className="w-4 h-4" /> NETRUNNER_MINING_CORE</span>
+                        <span className="text-[10px] text-slate-500">DECRYPTION READY</span>
+                    </div>
+
+                    <div className="flex-1 flex flex-col gap-4">
+                        <div className="flex gap-2">
+                            {Object.values(CRYPTO_TYPES).map(c => {
+                                const actualRate = Math.min(100, (c.successRate + cpuBonus) * 100);
+                                return (
+                                    <button key={c.id} onClick={() => setSelectedCrypto(c.id)} className={`flex-1 p-2 border rounded-sm text-xs flex flex-col items-center gap-1 transition-all ${selectedCrypto === c.id ? `border-${c.color.split('-')[1]}-500 bg-slate-800 shadow-[0_0_10px_currentColor] ${c.color}` : 'border-slate-800 text-slate-500 hover:bg-slate-900'}`}>
+                                        <DatabaseIcon className="w-5 h-5" /><span>{c.id}</span><span className="text-[10px] opacity-60">{actualRate.toFixed(0)}% RATE</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <div className="flex-1 flex flex-col items-center justify-center p-4">
+                            <button onClick={handleMine} className={`relative group flex items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-slate-800 hover:border-cyan-500 hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all bg-slate-950 active:scale-95 select-none`}>
+                                <div className="absolute inset-2 border border-dashed border-slate-700 rounded-full group-hover:border-cyan-400/50 group-hover:animate-[spin_10s_linear_infinite]"></div>
+                                <div className="flex flex-col items-center"><CpuIcon className={`w-10 h-10 md:w-14 md:h-14 ${CRYPTO_TYPES[selectedCrypto].color} group-hover:drop-shadow-[0_0_10px_currentColor]`} /><span className="mt-2 text-slate-400 font-bold tracking-widest text-sm md:text-base group-hover:text-white">DECRYPT</span></div>
+                                {recoveryFactor > 0 && <div className="absolute -top-4 bg-green-900/80 text-green-400 border border-green-500 text-[10px] px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]">ERHOLUNGS-BOOST x{manualYieldMultiplier.toFixed(2)}</div>}
+                            </button>
+                            {playerState.upgrades.gpuLevel > 0 && (
+                                <div className="w-full max-w-[200px] mt-6">
+                                    <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1"><span>GPU TEMP</span><span className={heat >= 100 ? 'text-red-500 animate-pulse' : 'text-purple-400'}>{Math.floor(heat)}%</span></div>
+                                    <div className="h-3 bg-slate-950 rounded border border-slate-800 overflow-hidden relative"><div className={`h-full transition-all duration-300 ${heat >= 100 ? 'bg-red-600' : heat > 75 ? 'bg-orange-500' : 'bg-purple-500'}`} style={{ width: `${heat}%` }}></div></div>
+                                    <button onClick={() => { setPlayerState(prev => ({ ...prev, gpuHeat: Math.max(0, (prev.gpuHeat || 0) - 40) })); addLog("[SYS] Kühlmittel gespült. Temperatur sinkt.", "info"); }} className="w-full mt-2 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500 text-[10px] text-slate-400 hover:text-cyan-400 font-bold rounded cursor-pointer transition-colors active:scale-95">FLUSH COOLANT (-40%)</button>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="h-28 bg-black border border-slate-800 rounded p-2 overflow-y-auto text-xs flex flex-col gap-1 mt-auto">
+                            {logs.length === 0 && <span className="text-slate-600 italic">Warte auf Eingabe...</span>}
+                            {logs.map(log => (<div key={log.id} className={log.type === 'success' ? 'text-green-400' : log.type === 'error' ? 'text-red-500' : 'text-slate-400'}><span className="opacity-50 mr-2">{new Date().toLocaleTimeString()}</span>{log.msg}</div>))}
+                            <div ref={logsEndRef} />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const MarketApp = ({ playerState, setPlayerState, addNotification }) => {
+            const [marketSelectedCoin, setMarketSelectedCoin] = useState('NNC');
+            const [tradeInput, setTradeInput] = useState('1.00');
+
+            const handleTrade = (action, isAll = false) => {
+                const currentPrice = playerState.market?.[marketSelectedCoin]?.price || CRYPTO_TYPES[marketSelectedCoin].value;
+                const availableCrypto = playerState.inventory[marketSelectedCoin];
+                const availableCR = playerState.credits;
+                
+                let amountNum = parseFloat(tradeInput);
+
+                if (action === 'SELL') {
+                    const sellAmount = isAll ? availableCrypto : Math.min(availableCrypto, amountNum);
+                    if (isNaN(sellAmount) || sellAmount <= 0) return;
+                    
+                    const revenue = sellAmount * currentPrice;
+                    setPlayerState(prev => ({ 
+                        ...prev, 
+                        credits: prev.credits + revenue, 
+                        inventory: { ...prev.inventory, [marketSelectedCoin]: Number((prev.inventory[marketSelectedCoin] - sellAmount).toFixed(2)) } 
+                    }));
+                    addNotification("TRADE EXEC", `VERKAUFT: ${sellAmount.toFixed(2)} ${marketSelectedCoin} für ${revenue.toFixed(2)} CR`, "success");
                 } else if (action === 'BUY') {
-                    const amountToBuy = amount === 'ALL' ? playerState.credits / currentPrice : amount;
-                    if (amountToBuy > 0 && playerState.credits >= amountToBuy * currentPrice) {
-                        setPlayerState(prev => ({ ...prev, credits: prev.credits - (amountToBuy * currentPrice), inventory: { ...prev.inventory, [cryptoId]: Number((prev.inventory[cryptoId] + amountToBuy).toFixed(2)) } }));
+                    const maxAffordable = availableCR / currentPrice;
+                    const buyAmount = isAll ? maxAffordable : amountNum;
+                    
+                    if (isNaN(buyAmount) || buyAmount <= 0 || availableCR < buyAmount * currentPrice) {
+                        addNotification("INSUFFICIENT FUNDS", "Nicht genug Credits für diese Transaktion.", "error");
+                        return;
                     }
+
+                    const cost = buyAmount * currentPrice;
+                    setPlayerState(prev => ({ 
+                        ...prev, 
+                        credits: prev.credits - cost, 
+                        inventory: { ...prev.inventory, [marketSelectedCoin]: Number((prev.inventory[marketSelectedCoin] + buyAmount).toFixed(2)) } 
+                    }));
+                    addNotification("TRADE EXEC", `GEKAUFT: ${buyAmount.toFixed(2)} ${marketSelectedCoin} für ${cost.toFixed(2)} CR`, "success");
+                }
+            };
+
+            const setPercentageAmount = (pct, type) => {
+                const currentPrice = playerState.market?.[marketSelectedCoin]?.price || CRYPTO_TYPES[marketSelectedCoin].value;
+                if (type === 'BUY') {
+                    const maxAffordable = playerState.credits / currentPrice;
+                    setTradeInput((maxAffordable * pct).toFixed(2));
+                } else {
+                    const availableCrypto = playerState.inventory[marketSelectedCoin];
+                    setTradeInput((availableCrypto * pct).toFixed(2));
                 }
             };
 
             return (
-                <div className="flex flex-col h-full font-mono">
-                    <div className="flex border-b border-slate-800 mb-4 flex-shrink-0">
-                        <button onClick={() => setActiveTab('MINE')} className={`flex-1 p-2 flex items-center justify-center gap-2 border-b-2 transition-colors ${activeTab === 'MINE' ? 'border-cyan-400 text-cyan-400 bg-slate-900' : 'border-transparent text-slate-500 hover:text-slate-300'}`}><CpuIcon className="w-4 h-4" /> MINER</button>
-                        <button onClick={() => setActiveTab('MARKET')} className={`flex-1 p-2 flex items-center justify-center gap-2 border-b-2 transition-colors ${activeTab === 'MARKET' ? 'border-purple-400 text-purple-400 bg-slate-900' : 'border-transparent text-slate-500 hover:text-slate-300'}`}><ActivityIcon className="w-4 h-4" /> MARKET EXCHANGE</button>
+                <div className="flex flex-col h-full font-mono bg-slate-950">
+                    <div className="flex gap-2 p-2 border-b border-slate-800 flex-shrink-0 bg-black overflow-x-auto custom-scrollbar">
+                        {Object.values(CRYPTO_TYPES).map(c => {
+                            const mktData = playerState.market?.[c.id] || { price: c.value, trend: 0 };
+                            const trend = mktData.trend;
+                            const isSelected = marketSelectedCoin === c.id;
+                            return (
+                                <button 
+                                    key={c.id} 
+                                    onClick={() => setMarketSelectedCoin(c.id)} 
+                                    className={`px-3 py-1.5 border rounded-sm text-xs flex items-center gap-3 transition-all whitespace-nowrap cursor-pointer ${isSelected ? `border-${c.color.split('-')[1]}-500 bg-slate-900 shadow-[0_0_10px_currentColor] ${c.color}` : 'border-slate-800 text-slate-500 hover:bg-slate-900'}`}
+                                >
+                                    <span className="font-bold">{c.id}</span>
+                                    <span className="text-white">{mktData.price.toFixed(2)}</span>
+                                    {trend > 0 ? <TrendingUpIcon className="w-3 h-3 text-green-500" /> : <TrendingDownIcon className="w-3 h-3 text-red-500" />}
+                                </button>
+                            );
+                        })}
                     </div>
 
-                    {activeTab === 'MINE' && (
-                        <div className="flex-1 flex flex-col gap-4">
-                            <div className="flex gap-2">
-                                {Object.values(CRYPTO_TYPES).map(c => {
-                                    const actualRate = Math.min(100, (c.successRate + cpuBonus) * 100);
-                                    return (
-                                        <button key={c.id} onClick={() => setSelectedCrypto(c.id)} className={`flex-1 p-2 border rounded-sm text-xs flex flex-col items-center gap-1 transition-all ${selectedCrypto === c.id ? `border-${c.color.split('-')[1]}-500 bg-slate-800 shadow-[0_0_10px_currentColor] ${c.color}` : 'border-slate-800 text-slate-500 hover:bg-slate-900'}`}>
-                                            <DatabaseIcon className="w-5 h-5" /><span>{c.id}</span><span className="text-[10px] opacity-60">{actualRate.toFixed(0)}% RATE</span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                    <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden p-4">
+                        <div className="flex-1 flex flex-col gap-4 overflow-y-auto lg:overflow-hidden relative">
+                            {(() => {
+                                const activeCoinData = CRYPTO_TYPES[marketSelectedCoin];
+                                const mktData = playerState.market?.[marketSelectedCoin] || { price: activeCoinData.value, history: Array(40).fill(activeCoinData.value), trend: 0 };
+                                const pctChange = mktData.trend !== 0 ? (mktData.trend / (mktData.price - mktData.trend)) * 100 : 0;
+                                const high24 = Math.max(...mktData.history).toFixed(3);
+                                const low24 = Math.min(...mktData.history).toFixed(3);
+                                const vol24 = (mktData.price * 8432 + Math.random() * 1000).toLocaleString('de-DE', { maximumFractionDigits: 0 }) + " CR";
 
-                            <div className="flex-1 flex flex-col items-center justify-center p-4">
-                                <button onClick={handleMine} className={`relative group flex items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-slate-800 hover:border-cyan-500 hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all bg-slate-950 active:scale-95 select-none`}>
-                                    <div className="absolute inset-2 border border-dashed border-slate-700 rounded-full group-hover:border-cyan-400/50 group-hover:animate-[spin_10s_linear_infinite]"></div>
-                                    <div className="flex flex-col items-center"><CpuIcon className={`w-10 h-10 md:w-14 md:h-14 ${CRYPTO_TYPES[selectedCrypto].color} group-hover:drop-shadow-[0_0_10px_currentColor]`} /><span className="mt-2 text-slate-400 font-bold tracking-widest text-sm md:text-base group-hover:text-white">DECRYPT</span></div>
-                                    {recoveryFactor > 0 && <div className="absolute -top-4 bg-green-900/80 text-green-400 border border-green-500 text-[10px] px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]">ERHOLUNGS-BOOST x{manualYieldMultiplier.toFixed(2)}</div>}
-                                </button>
-                                {playerState.upgrades.gpuLevel > 0 && (
-                                    <div className="w-full max-w-[200px] mt-6">
-                                        <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1"><span>GPU TEMP</span><span className={heat >= 100 ? 'text-red-500 animate-pulse' : 'text-purple-400'}>{Math.floor(heat)}%</span></div>
-                                        <div className="h-3 bg-slate-950 rounded border border-slate-800 overflow-hidden relative"><div className={`h-full transition-all duration-300 ${heat >= 100 ? 'bg-red-600' : heat > 75 ? 'bg-orange-500' : 'bg-purple-500'}`} style={{ width: `${heat}%` }}></div></div>
-                                        <button onClick={() => { setPlayerState(prev => ({ ...prev, gpuHeat: Math.max(0, (prev.gpuHeat || 0) - 40) })); addLog("[SYS] Kühlmittel gespült. Temperatur sinkt.", "info"); }} className="w-full mt-2 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500 text-[10px] text-slate-400 hover:text-cyan-400 font-bold rounded cursor-pointer transition-colors active:scale-95">FLUSH COOLANT (-40%)</button>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="h-28 bg-black border border-slate-800 rounded p-2 overflow-y-auto text-xs flex flex-col gap-1 mt-auto">
-                                {logs.length === 0 && <span className="text-slate-600 italic">Warte auf Eingabe...</span>}
-                                {logs.map(log => (<div key={log.id} className={log.type === 'success' ? 'text-green-400' : log.type === 'error' ? 'text-red-500' : 'text-slate-400'}><span className="opacity-50 mr-2">{new Date().toLocaleTimeString()}</span>{log.msg}</div>))}
-                                <div ref={logsEndRef} />
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'MARKET' && (
-                        <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden min-h-0">
-                            <div className="flex-1 flex flex-col gap-4 overflow-y-auto lg:overflow-hidden">
-                                <div className="flex gap-2 flex-shrink-0">
-                                    {Object.values(CRYPTO_TYPES).map(c => {
-                                        const trend = playerState.market?.[c.id]?.trend || 0;
-                                        return (
-                                            <button key={c.id} onClick={() => setMarketSelectedCoin(c.id)} className={`flex-1 p-2 border rounded-sm text-xs flex justify-between items-center transition-all ${marketSelectedCoin === c.id ? `border-${c.color.split('-')[1]}-500 bg-slate-900 shadow-[0_0_10px_currentColor] ${c.color}` : 'border-slate-800 text-slate-500 hover:bg-slate-900'}`}>
-                                                <span className="font-bold">{c.id}</span>{trend > 0 ? <TrendingUpIcon className="w-3 h-3 text-green-500" /> : <TrendingDownIcon className="w-3 h-3 text-red-500" />}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                                {(() => {
-                                    const activeCoinData = CRYPTO_TYPES[marketSelectedCoin];
-                                    const mktData = playerState.market?.[marketSelectedCoin] || { price: activeCoinData.value, history: Array(40).fill(activeCoinData.value), trend: 0 };
-                                    const pctChange = mktData.trend !== 0 ? (mktData.trend / (mktData.price - mktData.trend)) * 100 : 0;
-                                    return (
-                                        <div className="flex-1 min-h-[150px] bg-slate-950 border border-slate-800 rounded relative p-3 flex flex-col">
-                                            <div className="flex justify-between items-start z-10 relative mb-4">
-                                                <div>
-                                                    <div className={`text-2xl font-bold ${activeCoinData.color} tracking-wider flex items-center gap-2`}>{mktData.price.toFixed(3)} <span className="text-sm text-slate-500">CR</span></div>
-                                                    <div className={`text-xs font-bold ${mktData.trend > 0 ? 'text-green-500' : mktData.trend < 0 ? 'text-red-500' : 'text-slate-500'}`}>{mktData.trend > 0 ? '+' : ''}{mktData.trend.toFixed(3)} ({pctChange.toFixed(2)}%)</div>
+                                return (
+                                    <div className="flex-1 min-h-[250px] bg-black border border-slate-800 rounded relative p-4 flex flex-col shadow-inner">
+                                        <div className="flex justify-between items-start z-10 relative mb-4">
+                                            <div>
+                                                <div className={`text-4xl font-bold ${activeCoinData.color} tracking-wider flex items-center gap-2 drop-shadow-md`}>
+                                                    {mktData.price.toFixed(3)} <span className="text-lg text-slate-500">CR</span>
                                                 </div>
-                                                <div className="px-2 py-1 bg-slate-900 border border-slate-700 rounded text-[10px] text-slate-400">LIVE MARKET</div>
+                                                <div className={`text-sm font-bold mt-1 ${mktData.trend > 0 ? 'text-green-500' : mktData.trend < 0 ? 'text-red-500' : 'text-slate-500'}`}>
+                                                    {mktData.trend > 0 ? '+' : ''}{mktData.trend.toFixed(3)} ({pctChange.toFixed(2)}%)
+                                                </div>
                                             </div>
-                                            <div className="absolute left-0 right-0 bottom-0 top-16 px-2 pb-2 opacity-80"><Sparkline data={mktData.history} color={activeCoinData.hex} /></div>
+                                            
+                                            <div className="flex gap-4 text-right bg-slate-900/80 p-2 rounded border border-slate-800 backdrop-blur-sm">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] text-slate-500">24H HIGH</span>
+                                                    <span className="text-xs text-white">{high24}</span>
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] text-slate-500">24H LOW</span>
+                                                    <span className="text-xs text-white">{low24}</span>
+                                                </div>
+                                                <div className="flex flex-col border-l border-slate-700 pl-4 ml-2">
+                                                    <span className="text-[10px] text-slate-500">24H VOL</span>
+                                                    <span className="text-xs text-cyan-400">{vol24}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    );
-                                })()}
-                                <div className="bg-slate-900 border border-slate-800 p-3 rounded flex flex-col gap-3 flex-shrink-0">
-                                    <div className="flex justify-between text-xs text-slate-400 border-b border-slate-800 pb-2"><span>DEIN WALLET: <span className="text-white">{playerState.inventory[marketSelectedCoin].toFixed(2)} {marketSelectedCoin}</span></span><span>GUTHABEN: <span className="text-cyan-400">{playerState.credits.toFixed(2)} CR</span></span></div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex flex-col gap-2"><button onClick={() => handleTrade(marketSelectedCoin, 'BUY', 1)} className="py-1.5 bg-green-950/30 border border-green-900 hover:border-green-500 text-green-500 text-xs font-bold rounded transition-colors active:bg-green-900">KAUFEN (1.0)</button></div>
-                                        <div className="flex flex-col gap-2">
-                                            <button onClick={() => handleTrade(marketSelectedCoin, 'SELL', 1)} disabled={playerState.inventory[marketSelectedCoin] < 1} className="py-1.5 bg-red-950/30 border border-red-900 hover:border-red-500 text-red-500 text-xs font-bold rounded transition-colors active:bg-red-900 disabled:opacity-30 disabled:cursor-not-allowed">VERKAUFEN (1.0)</button>
-                                            <button onClick={() => handleTrade(marketSelectedCoin, 'SELL', 'ALL')} disabled={playerState.inventory[marketSelectedCoin] <= 0} className="py-1.5 bg-red-950/50 border border-red-800 hover:border-red-400 text-red-400 text-xs font-bold rounded transition-colors active:bg-red-900 disabled:opacity-30 disabled:cursor-not-allowed">SELL ALL</button>
+                                        
+                                        <div className="absolute left-0 right-0 bottom-0 top-24 px-2 pb-2 opacity-80">
+                                            <Sparkline data={mktData.history} color={activeCoinData.hex} />
                                         </div>
+                                        
+                                        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
+                                    </div>
+                                );
+                            })()}
+                        </div>
+
+                        <div className="w-full lg:w-72 flex flex-col gap-4 flex-shrink-0">
+                            <div className="bg-slate-900 border border-slate-700 p-4 rounded flex flex-col gap-4 shadow-lg">
+                                <h3 className="text-white font-bold border-b border-slate-800 pb-2 mb-1 flex items-center gap-2">
+                                    <ActivityIcon className="w-4 h-4 text-cyan-400"/> ORDER_EXECUTION
+                                </h3>
+                                
+                                <div className="flex justify-between text-xs text-slate-400">
+                                    <div className="flex flex-col"><span>Wallet:</span><span className="text-white font-bold">{playerState.inventory[marketSelectedCoin].toFixed(2)} {marketSelectedCoin}</span></div>
+                                    <div className="flex flex-col text-right"><span>Liquide:</span><span className="text-cyan-400 font-bold">{playerState.credits.toFixed(2)} CR</span></div>
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] text-slate-500">MENGE (AMOUNT)</label>
+                                    <div className="relative">
+                                        <input 
+                                            type="number" 
+                                            value={tradeInput}
+                                            onChange={(e) => setTradeInput(e.target.value)}
+                                            className="w-full bg-black border border-slate-600 focus:border-cyan-500 rounded p-2 text-white font-mono text-sm outline-none transition-colors"
+                                            placeholder="0.00"
+                                        />
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-bold">{marketSelectedCoin}</div>
                                     </div>
                                 </div>
+
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <div className="text-[10px] text-slate-500 text-center">BUY %</div>
+                                    <div className="text-[10px] text-slate-500 text-center">SELL %</div>
+                                    
+                                    <div className="grid grid-cols-2 gap-1">
+                                        <button onClick={() => setPercentageAmount(0.5, 'BUY')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">50%</button>
+                                        <button onClick={() => setPercentageAmount(1.0, 'BUY')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">MAX</button>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-1">
+                                        <button onClick={() => setPercentageAmount(0.5, 'SELL')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">50%</button>
+                                        <button onClick={() => setPercentageAmount(1.0, 'SELL')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">MAX</button>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 mt-2">
+                                    <button 
+                                        onClick={() => handleTrade('BUY')}
+                                        className="py-3 bg-green-600 hover:bg-green-500 text-white text-sm font-bold tracking-widest rounded transition-all active:scale-95 shadow-[0_0_10px_rgba(22,163,74,0.3)] cursor-pointer"
+                                    >
+                                        BUY
+                                    </button>
+                                    <button 
+                                        onClick={() => handleTrade('SELL')}
+                                        className="py-3 bg-red-600 hover:bg-red-500 text-white text-sm font-bold tracking-widest rounded transition-all active:scale-95 shadow-[0_0_10px_rgba(220,38,38,0.3)] cursor-pointer"
+                                    >
+                                        SELL
+                                    </button>
+                                </div>
                             </div>
-                            <div className="w-full lg:w-64 bg-slate-950 border border-slate-800 rounded flex flex-col flex-shrink-0">
-                                <div className="p-2 border-b border-slate-800 text-xs font-bold text-slate-500 flex items-center gap-2 bg-slate-900/50"><NewspaperIcon className="w-4 h-4"/> MARKET_FEED</div>
-                                <div className="flex-1 overflow-y-auto p-2 space-y-3 custom-scrollbar min-h-[150px]">
+
+                            <div className="flex-1 bg-black border border-slate-800 rounded flex flex-col min-h-[150px]">
+                                <div className="p-2 border-b border-slate-800 text-xs font-bold text-slate-500 flex items-center gap-2 bg-slate-900/50 shrink-0">
+                                    <NewspaperIcon className="w-4 h-4"/> MARKET_FEED
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-2 space-y-3 custom-scrollbar">
                                     {(!playerState.marketNews || playerState.marketNews.length === 0) && <div className="text-[10px] text-slate-600 italic">Analysiere globale Netzwerke...</div>}
                                     {playerState.marketNews?.map((news, idx) => (
                                         <div key={idx} className="text-[10px] border-l-2 pl-2 py-1" style={{ borderColor: news.type === 'good' ? '#22c55e' : '#ef4444' }}>
@@ -900,7 +1033,7 @@
                                 </div>
                             </div>
                         </div>
-                    )}
+                    </div>
                 </div>
             );
         };
@@ -1265,12 +1398,14 @@
                         <div className="absolute top-4 left-4 text-red-500 font-mono text-[10px] z-50 opacity-50">CAM_01_ONLINE</div>
                     </div>
                 </div>
-            )
+            );
         };
 
+        // App-Definitionen für das Menü und die Taskleiste
         const APPS = {
             story: { id: 'story', name: 'E.V.A._Logs', icon: FileTextIcon, color: 'text-pink-400', borderColor: 'border-pink-500', component: StoryApp, title: "E.V.A._SYSTEM_LOGS.txt", defaultPos: { x: 40, y: 40 }, defaultSize: { width: 500, height: 400 }, showOnDesktop: true, showInStart: false },
-            miner: { id: 'miner', name: 'NetRunner', icon: DatabaseIcon, color: 'text-green-400', borderColor: 'border-green-500', component: CryptoApp, title: "NETRUNNER_CRYPTO_V2.1", defaultPos: { x: 60, y: 20 }, defaultSize: { width: 650, height: 500 }, showOnDesktop: true, showInStart: false },
+            miner: { id: 'miner', name: 'NetRunner', icon: DatabaseIcon, color: 'text-green-400', borderColor: 'border-green-500', component: CryptoApp, title: "NETRUNNER_MINING_CORE", defaultPos: { x: 60, y: 20 }, defaultSize: { width: 500, height: 500 }, showOnDesktop: true, showInStart: false },
+            market: { id: 'market', name: 'Exchange', icon: BarChartIcon, color: 'text-cyan-400', borderColor: 'border-cyan-500', component: MarketApp, title: "NEXUS_EXCHANGE_V3", defaultPos: { x: 100, y: 50 }, defaultSize: { width: 850, height: 600 }, showOnDesktop: true, showInStart: true },
             shadowboard: { id: 'shadowboard', name: 'ShadowBoard', icon: BriefcaseIcon, color: 'text-red-400', borderColor: 'border-red-500', component: ShadowBoardApp, title: "SHADOW_BOARD_V2.0", defaultPos: { x: 180, y: 80 }, defaultSize: { width: 500, height: 550 }, showOnDesktop: true, showInStart: true },
             browser: { id: 'browser', name: 'Nexus Browser', icon: GlobeIcon, color: 'text-blue-400', borderColor: 'border-blue-500', component: BrowserApp, title: "NEXUS_BROWSER_v1.0", defaultPos: { x: 100, y: 60 }, defaultSize: { width: 650, height: 550 }, showOnDesktop: true, showInStart: true },
             smartcam: { id: 'smartcam', name: 'SmartCam', icon: CameraIcon, color: 'text-teal-400', borderColor: 'border-teal-500', component: SmartCamApp, title: "SECURE_CAM_VIEWER", defaultPos: { x: 220, y: 120 }, defaultSize: { width: 500, height: 400 }, showOnDesktop: true, showInStart: true },
