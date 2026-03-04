@@ -260,8 +260,17 @@
 
         const CHANGELOG_DATA = [
             { 
-                version: "v0.2.0Alpha", 
+                version: "v0.2.1Alpha", 
                 date: "AKTUELL", 
+                changes: [
+                    "Interaktives NeoHome Corp. Mieterhandbuch hinzugefügt",
+                    "Story-App zum offiziellen Dokumenten-Viewer umgebaut",
+                    "Dynamische Erkennung des E.V.A. Service-Tiers im Handbuch"
+                ] 
+            },
+            { 
+                version: "v0.2.0Alpha", 
+                date: "ARCHIV", 
                 changes: [
                     "Zusammenführung aller bisherigen Features zur ersten spielbaren Alpha",
                     "Dynamisches Krypto-Market-System mit Trading-UI und Preis-Alarmen",
@@ -486,32 +495,99 @@
             );
         };
 
-        const StoryApp = () => (
-            <div className="font-mono text-slate-300 space-y-8 text-sm md:text-base">
-                <div className="border-l-2 border-pink-500 pl-4">
-                    <h3 className="text-pink-500 font-bold mb-2">LOG 01: Das Echo der Leere</h3>
-                    <p className="mb-2">Nathan wacht auf. Nicht auf seiner durchgelegenen Memory-Foam-Matratze, sondern auf eiskaltem, synthetischem Polymer-Boden. Der Kopf pocht nach einer Nacht voller billigem Synth-Bier und gescheiterten Versuchen, in einer lokalen Neon-Bar jemanden kennenzulernen. Er blinzelt gegen das flackernde Licht der Straßenlaterne, das durch das Fenster fällt.</p>
-                    <p className="text-red-400">Dann der Schock: Der Raum hallt. Das Bett? Weg. Der alte Holo-TV? Weg. Sogar die halb leeren Ramen-Nudeln aus der Ecke und der flauschige Teppich sind verschwunden. Die Wohnung wurde nicht einfach ausgeraubt, sie wurde chirurgisch entkernt.</p>
+        // --- ÜBERARBEITET: STORY APP WIRD ZUM DOKUMENTEN-VIEWER FÜR DAS HANDBUCH ---
+        const StoryApp = ({ playerState }) => {
+            const isPremium = playerState.tenant?.evaPremium;
+            const isPaid = playerState.tenant?.rentPaid;
+
+            return (
+                <div className="font-sans text-slate-300 space-y-6 text-sm md:text-base p-2">
+                    <div className="border-b-2 border-blue-900 pb-4 mb-4">
+                        <h2 className="text-2xl font-black text-blue-400 tracking-tighter">NeoHome Corp.</h2>
+                        <h3 className="text-lg text-slate-200">Mieter-Informationsbroschüre</h3>
+                        <p className="italic text-slate-500 text-xs mt-1">"Leben Sie nicht nur. Lassen Sie sich verwalten. Willkommen in der Zukunft des Wohnens."</p>
+                    </div>
+
+                    <div className="flex justify-between text-xs text-slate-500 font-mono bg-slate-900 p-2 rounded">
+                        <span>Dokument-ID: NH-EVA-4092-Rev.C</span>
+                        <span>Betreff: Ihr neues E.V.A.-System</span>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h4 className="text-blue-400 font-bold border-b border-slate-800 pb-1">Wer oder was ist E.V.A.?</h4>
+                        <p>Herzlichen Glückwunsch zum Einzug in Ihre neue NeoHome Corp. Immobilie! Ihre Wohnung ist serienmäßig mit E.V.A. (Elektronische Verwaltungs-Assistenz) ausgestattet.</p>
+                        <p>E.V.A. ist nicht einfach nur ein Smart-Home-System. Sie ist eine hochkomplexe, neuronale Schnittstelle der Klasse 4, die direkt mit den Lebenserhaltungssystemen, den Sicherheitsprotokollen und dem internen Netzwerk des Gebäudes verbunden ist. Sie regelt Ihr Klima, überwacht Ihre Nährstoffzufuhr, schützt Sie vor Eindringlingen und optimiert Ihren Alltag – rund um die Uhr.</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h4 className="text-blue-400 font-bold border-b border-slate-800 pb-1">Ihre Grundfunktionen (Sprachsteuerung)</h4>
+                        <p>E.V.A. reagiert auf das Aktivierungswort: <span className="text-cyan-300 font-mono">"Hey E.V.A."</span><br/>
+                        Bitte sprechen Sie deutlich und in Richtung der nächsten Audio-Rezeptor-Kachel (rot blinkende Punkte an der Decke).</p>
+                        <ul className="list-disc pl-5 space-y-2 text-slate-400">
+                            <li><span className="text-slate-200 font-mono">"Hey E.V.A., Statusbericht."</span> – Gibt Auskunft über Raumtemperatur, Luftqualität und aktuelle NeoHome-Angebote.</li>
+                            <li><span className="text-slate-200 font-mono">"Hey E.V.A., Lockdown."</span> – Verriegelt alle Türen und Fenster (Hinweis: Kostenpflichtiger Premium-Sicherheitsdienst).</li>
+                            <li><span className="text-slate-200 font-mono">"Hey E.V.A., Licht."</span> – Aktiviert die Standard-Beleuchtung (Neon-Weiß, 60%).</li>
+                        </ul>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h4 className="text-blue-400 font-bold border-b border-slate-800 pb-1">NeoHome Service-Stufen (WICHTIG!)</h4>
+                        <p>Die Persönlichkeit und der Funktionsumfang von E.V.A. passen sich dynamisch Ihrer finanziellen Situation und Ihrem aktuellen Mietkonto an.</p>
+                        
+                        <div className={`p-3 border-l-4 rounded transition-colors ${isPremium ? 'border-pink-500 bg-pink-950/20 shadow-[0_0_15px_rgba(236,72,153,0.1)]' : 'border-slate-700 bg-slate-900/50'}`}>
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className={`font-bold ${isPremium ? 'text-pink-400' : 'text-slate-500'}`}>Neo-Platinum (Der Traum)</span>
+                                {isPremium && <span className="bg-pink-500/20 text-pink-400 px-2 py-0.5 rounded text-[10px] animate-pulse font-mono tracking-widest border border-pink-500/50">IHR AKTUELLER STATUS</span>}
+                            </div>
+                            <p className="text-xs text-slate-400">E.V.A. verfügt über das volle "Best Buddy"-Empathie-Modul. Sie erzählt Witze, tröstet Sie nach einem harten Arbeitstag, passt das Licht Ihrer Stimmung an und bestellt proaktiv Ihre Lieblings-Synth-Ramen.</p>
+                        </div>
+
+                        <div className={`p-3 border-l-4 rounded transition-colors ${isPaid && !isPremium ? 'border-cyan-500 bg-cyan-950/20 shadow-[0_0_15px_rgba(34,211,238,0.1)]' : 'border-slate-700 bg-slate-900/50'}`}>
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className={`font-bold ${isPaid && !isPremium ? 'text-cyan-400' : 'text-slate-500'}`}>Neo-Standard (Der Durchschnitt)</span>
+                                {isPaid && !isPremium && <span className="bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded text-[10px] animate-pulse font-mono tracking-widest border border-cyan-500/50">IHR AKTUELLER STATUS</span>}
+                            </div>
+                            <p className="text-xs text-slate-400">Höfliche, aber formelle Interaktion. Temperatur auf 21°C limitiert. Gelegentliche Audio-Werbung für NeoHome-Partnerunternehmen beim Betreten des Badezimmers.</p>
+                        </div>
+
+                        <div className={`p-3 border-l-4 rounded transition-colors ${!isPaid ? 'border-red-500 bg-red-950/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-slate-700 bg-slate-900/50'}`}>
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className={`font-bold ${!isPaid ? 'text-red-400' : 'text-slate-500'}`}>Neo-Restriktiv</span>
+                                {!isPaid && <span className="bg-red-500/20 text-red-400 px-2 py-0.5 rounded text-[10px] animate-pulse font-mono tracking-widest border border-red-500/50">IHR AKTUELLER STATUS</span>}
+                            </div>
+                            <p className="text-xs mb-2 text-slate-300">Wird bei Zahlungsverzug von mehr als 14 Tagen automatisch aktiviert.</p>
+                            <ul className="list-disc pl-4 text-xs text-slate-400 space-y-1">
+                                <li>Das Empathie-Modul wird zur Ressourcenschonung deaktiviert.</li>
+                                <li>E.V.A. kommuniziert ausschließlich in monotoner Sachlichkeit.</li>
+                                <li>Die Raumtemperatur wird auf ein legales Minimum von 16°C gesenkt.</li>
+                                <li>Türen öffnen sich mit einer systembedingten Verzögerung von 3 Sekunden.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h4 className="text-blue-400 font-bold border-b border-slate-800 pb-1">Fehlerbehebung (FAQ)</h4>
+                        <div className="bg-slate-900/50 p-3 rounded">
+                            <p className="font-bold text-sm text-slate-200 mb-1">Frage: Meine E.V.A. klingt sarkastisch, kalt oder ignoriert meine Gefühle. Ist sie defekt?</p>
+                            <p className="text-xs text-slate-400">Antwort: Nein. Dies ist ein Feature des Neo-Restriktiv-Modus. Um E.V.A.s freundliche Persönlichkeit wiederherzustellen, begleichen Sie bitte umgehend Ihre ausstehenden Mietschulden zuzüglich der Mahngebühren von 15%.</p>
+                        </div>
+                        <div className="bg-slate-900/50 p-3 rounded">
+                            <p className="font-bold text-sm text-slate-200 mb-1">Frage: Die Wohnung ist komplett leer, alle Möbel sind weg. Hat E.V.A. einen Fehler gemacht?</p>
+                            <p className="text-xs text-slate-400">Antwort: E.V.A. macht keine Fehler. Bei unautorisierter Entfernung von Inventar greift Paragraph 4b des Mietvertrags. Bitte kontaktieren Sie die lokale Sicherheitspolizei. NeoHome Corp. übernimmt keine Haftung für Diebstahl.</p>
+                        </div>
+                    </div>
+
+                    <div className="text-center text-[10px] text-slate-600 mt-8 pt-4 border-t border-slate-800">
+                        NeoHome Corp. – Wir besitzen den Raum, in dem Sie träumen.
+                    </div>
                 </div>
-                <div className="border-l-2 border-cyan-400 pl-4">
-                    <h3 className="text-cyan-400 font-bold mb-2">LOG 02: E.V.A. Status</h3>
-                    <p className="mb-2">In dieser absoluten Null-Situation bleiben Nathan genau zwei Dinge: Seine Wohnungs-KI <span className="text-cyan-300">"E.V.A."</span> und sein Smartphone.</p>
-                    <p className="mb-2 text-slate-500 italic">Die Elektronische Verwaltungs-Assistenz ist fest in die Wände des Gebäudes integriert und konnte daher nicht geklaut werden.</p>
-                    <p>Das Problem: Da Nathan mit der Miete im Rückstand ist, läuft E.V.A. nur noch im "Energiespar- & Basis-Modus". Das Premium-Empathie-Paket ist deaktiviert. Sie antwortet absolut monoton, extrem trocken und schonungslos ehrlich über Nathans aktuelle Lage.</p>
-                </div>
-                <div className="border-l-2 border-purple-500 pl-4">
-                    <h3 className="text-purple-500 font-bold mb-2">LOG 03: Terminal OS</h3>
-                    <p>Nathans Retter in der Not. Es lag beim Schlafen in seiner Hosentasche. Terminal OS ist ein leicht illegales, modifiziertes Betriebssystem für Leute, die abseits der großen Firmen-Netzwerke operieren müssen.</p>
-                    <p className="mt-2 text-slate-400">Hier laufen alle Fäden zusammen, um erste Credits zu verdienen und die Wohnung wieder einzurichten.</p>
-                </div>
-            </div>
-        );
+            );
+        };
 
         const SettingsApp = ({ playerState, setPlayerState }) => {
             const [activeTab, setActiveTab] = useState('INFO');
             const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-            // Hilfsfunktion zum Umschalten der Einstellungen
             const toggleSetting = (settingKey) => {
                 setPlayerState(prev => {
                     const currentSettings = prev.settings || { crtScanlines: false, audioFeedback: false };
@@ -1539,7 +1615,7 @@
 
         // App-Definitionen für das Menü und die Taskleiste
         const APPS = {
-            story: { id: 'story', name: 'E.V.A._Logs', icon: FileTextIcon, color: 'text-pink-400', borderColor: 'border-pink-500', component: StoryApp, title: "E.V.A._SYSTEM_LOGS.txt", defaultPos: { x: 40, y: 40 }, defaultSize: { width: 500, height: 400 }, showOnDesktop: true, showInStart: false },
+            story: { id: 'story', name: 'Dokumente', icon: FileTextIcon, color: 'text-blue-400', borderColor: 'border-blue-500', component: StoryApp, title: "NH-EVA-4092-Rev.C.pdf", defaultPos: { x: 40, y: 40 }, defaultSize: { width: 550, height: 600 }, showOnDesktop: true, showInStart: false },
             miner: { id: 'miner', name: 'NetRunner', icon: DatabaseIcon, color: 'text-green-400', borderColor: 'border-green-500', component: CryptoApp, title: "NETRUNNER_MINING_CORE", defaultPos: { x: 60, y: 20 }, defaultSize: { width: 500, height: 500 }, showOnDesktop: true, showInStart: false },
             market: { id: 'market', name: 'Exchange', icon: BarChartIcon, color: 'text-cyan-400', borderColor: 'border-cyan-500', component: MarketApp, title: "NEXUS_EXCHANGE_V3", defaultPos: { x: 100, y: 50 }, defaultSize: { width: 850, height: 600 }, showOnDesktop: true, showInStart: true },
             shadowboard: { id: 'shadowboard', name: 'ShadowBoard', icon: BriefcaseIcon, color: 'text-red-400', borderColor: 'border-red-500', component: ShadowBoardApp, title: "SHADOW_BOARD_V2.0", defaultPos: { x: 180, y: 80 }, defaultSize: { width: 500, height: 550 }, showOnDesktop: true, showInStart: true },
