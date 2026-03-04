@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Clicker</title>
+    
+    <!-- Tailwind CSS laden -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM laden -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel laden (Übersetzt den JSX Code für den Browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { margin: 0; background-color: black; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <!-- Hier wird die React App gerendert -->
+    <div id="root"></div>
+
+    <!-- Unser eigentlicher App-Code -->
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        // --- ERSATZ FÜR DIE LUCIDE-ICONS (Inline SVGs) ---
+        const PowerIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                <line x1="12" y1="2" x2="12" y2="12"></line>
+            </svg>
+        );
+
+        const TerminalIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+        );
+
+        const FileTextIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+        );
+
+        const SettingsIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        );
+
+        const XIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        );
+
+        const HexagonIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            </svg>
+        );
+
+        const RefreshIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+        );
+
+        const CpuIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <line x1="9" y1="1" x2="9" y2="4"></line>
+                <line x1="15" y1="1" x2="15" y2="4"></line>
+                <line x1="9" y1="20" x2="9" y2="23"></line>
+                <line x1="15" y1="20" x2="15" y2="23"></line>
+                <line x1="20" y1="9" x2="23" y2="9"></line>
+                <line x1="20" y1="14" x2="23" y2="14"></line>
+                <line x1="1" y1="9" x2="4" y2="9"></line>
+                <line x1="1" y1="14" x2="4" y2="14"></line>
+            </svg>
+        );
+
+        const WalletIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+            </svg>
+        );
+
+        const ActivityIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+        );
+
+        const DatabaseIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
+        );
+
+        const UserIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        );
+
+        const GlobeIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+        );
+
+        const AlertTriangleIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        );
+
+        const BellIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+        );
+
+        const CheckCircleIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        );
+
+        const TrendingUpIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                <polyline points="16 7 22 7 22 13"></polyline>
+            </svg>
+        );
+
+        const TrendingDownIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline>
+                <polyline points="16 17 22 17 22 11"></polyline>
+            </svg>
+        );
+
+        const NewspaperIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path>
+                <path d="M18 14h-8"></path>
+                <path d="M15 18h-5"></path>
+                <path d="M10 6h8v4h-8V6Z"></path>
+            </svg>
+        );
+
+        const MailIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+            </svg>
+        );
+
+        const ShoppingCartIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+        );
+
+        const BriefcaseIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+        );
+
+        const CameraIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
+                <circle cx="12" cy="13" r="3"></circle>
+            </svg>
+        );
+
+        const ShieldIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+        );
+
+        // ==========================================
+        // 1. KONFIGURATION & DATENBANKEN
+        // ==========================================
+        const GAME_STATES = { OFF: 'OFF', WAKING: 'WAKING', BOOTING: 'BOOTING', RUNNING: 'RUNNING' };
+
+        const THEME = {
+            bg: 'bg-slate-950',
+            neonPink: 'text-pink-500 drop-shadow-[0_0_10px_rgba(236,72,153,0.8)]',
+            neonPurple: 'text-purple-500 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]',
+            neonBlue: 'text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]',
+            neonRed: 'text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]',
+        };
+
+        const BOOT_SEQUENCE_LOGS = [
+            "INITIALISIERE NEURALE VERBINDUNG...",
+            "LADE KERNEL-MODULE [CYBER_CORE_V9.4]...",
+            "MOUNTING VIRTUAL FILE SYSTEM... OK",
+            "ÜBERPRÜFE ENERGIE-KNOTEN... 100%",
+            "DEKODIERE SICHERHEITSPROTOKOLLE...",
+            "WARNUNG: UNBEKANNTE SIGNATUR ENTDECKT.",
+            "IGNORIERE WARNUNG. ERZWINGE SYSTEMSTART...",
+            "VERBINDUNG ZUM NETZWERK HERGESTELLT.",
+            "SYSTEM BEREIT."
+        ];
+
+        const CRYPTO_TYPES = {
+            NNC: { id: 'NNC', name: 'NeonCoin', color: 'text-pink-500', bg: 'bg-pink-500', hex: '#ec4899', value: 0.5, successRate: 0.8, mineAmount: 0.1 },
+            BYC: { id: 'BYC', name: 'ByteCredit', color: 'text-blue-400', bg: 'bg-blue-400', hex: '#60a5fa', value: 2.5, successRate: 0.4, mineAmount: 0.05 },
+            VDT: { id: 'VDT', name: 'VoidToken', color: 'text-purple-500', bg: 'bg-purple-500', hex: '#a855f7', value: 15.0, successRate: 0.15, mineAmount: 0.01 }
+        };
+
+        const FURNITURE_ITEMS = [
+            { id: 'f_matratze', name: 'Memory-Foam Matratze', desc: 'Besser als der Polymer-Boden. +10% Erholungsfaktor.', cost: 150, recovery: 10 },
+            { id: 'f_desk', name: 'Gebrauchter Cyber-Desk', desc: 'Nie wieder Rückenschmerzen beim Coden. +15% Erholungsfaktor.', cost: 300, recovery: 15 },
+            { id: 'f_chair', name: 'Ergonomischer NetRunner-Stuhl', desc: 'Wie auf Wolken sitzen. +25% Erholungsfaktor.', cost: 600, recovery: 25 },
+            { id: 'f_bed', name: 'Schlafkapsel Deluxe', desc: 'Tiefschlaf-Garantie inklusive White-Noise. +50% Erholungsfaktor.', cost: 1500, recovery: 50 }
+        ];
+
+        const CHANGELOG_DATA = [
+            { version: "v2.4.0", date: "AKTUELL", changes: ["Dynamische Gigs (Belohnungen in Krypto & CR) hinzugefügt", "Risiko-Faktor & Polizei-Strafensystem implementiert", "NCPD Polizeiakte-App integriert"] },
+            { version: "v2.3.0", date: "ARCHIV", changes: ["ShadowBoard App (Gigs & Missionen) hinzugefügt", "SmartCam App (Echtzeit-Wohnungsvisualisierung) integriert"] },
+            { version: "v2.2.0", date: "ARCHIV", changes: ["SecureMail Client integriert", "Dynamische OS-Versionsanzeige implementiert", "Story-Mails von E.V.A. hinzugefügt"] },
+            { version: "v2.1.0", date: "ARCHIV", changes: ["Systemweite OS-Benachrichtigungen (Push) implementiert", "Changelog-Archiv in System-App integriert"] },
+            { version: "v2.0.5", date: "ARCHIV", changes: ["Dynamisches Krypto-Market-System", "Echtzeit-Graphen & Market-News-Feed", "Zentrale Portfolio-Dashboard App hinzugefügt"] },
+            { version: "v1.5.0", date: "ARCHIV", changes: ["Nexus Browser implementiert", "BlackMarket Shop mit Hardware-Upgrades", "Ad-Popups und Proxy-Simulation"] },
+            { version: "v1.2.0", date: "ARCHIV", changes: ["Passives GPU-Mining hinzugefügt", "Thermal-Management (Hitze-System & Kühlung)"] },
+            { version: "v1.1.0", date: "ARCHIV", changes: ["Frei bewegliche & skalierbare Fenster (Desktop-Manager)", "Persistente Speicherung (Auto-Save)"] },
+            { version: "v1.0.0", date: "ARCHIV", changes: ["Initiales Terminal OS Boot-System", "NetRunner Crypto-Clicker Basis"] }
+        ];
+
+        const Sparkline = ({ data, color }) => {
+            if (!data || data.length === 0) return null;
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            const range = max - min === 0 ? 1 : max - min;
+            const points = data.map((val, i) => `${(i / (data.length - 1)) * 100},${100 - ((val - min) / range) * 100}`).join(' ');
+            
+            return (
+                <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible drop-shadow-md" preserveAspectRatio="none">
+                    <polyline points={points} fill="none" stroke={color} strokeWidth="3" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            );
+        };
+
+        // ==========================================
+        // 2. KOMPONENTEN
+        // ==========================================
+
+        const PowerScreen = ({ onPowerOn }) => {
+            const particles = useMemo(() => Array.from({ length: 50 }).map((_, i) => ({
+                id: i,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${3 + Math.random() * 5}s`
+            })), []);
+
+            return (
+                <div className="flex flex-col items-center justify-center h-full w-full bg-black relative overflow-hidden">
+                    <div className="absolute top-1/2 left-[30%] w-[60vw] h-[60vw] bg-pink-600/30 rounded-full mix-blend-screen filter blur-[100px] animate-fog-drift-1 pointer-events-none"></div>
+                    <div className="absolute top-1/2 left-[70%] w-[60vw] h-[60vw] bg-blue-600/30 rounded-full mix-blend-screen filter blur-[100px] animate-fog-drift-2 pointer-events-none"></div>
+                    <div className="absolute top-1/4 left-0 w-96 h-1 bg-pink-500/50 blur-md animate-light-beam-1 pointer-events-none"></div>
+                    <div className="absolute bottom-1/4 right-0 w-[30rem] h-1 bg-blue-500/50 blur-md animate-light-beam-2 pointer-events-none"></div>
+
+                    <div className="absolute inset-0 pointer-events-none z-10">
+                        {particles.map(p => (
+                            <div key={p.id} className="absolute w-1 h-1 bg-white rounded-full opacity-0 animate-particle-float shadow-[0_0_8px_white]" style={{ left: p.left, top: p.top, animationDelay: p.animationDelay, animationDuration: p.animationDuration }} />
+                        ))}
+                    </div>
+
+                    <div className="relative flex items-center justify-center w-64 h-96 p-[3px] rounded-sm bg-gradient-to-b from-pink-500 to-blue-600 shadow-[0_-20px_50px_rgba(236,72,153,0.2),_0_20px_50px_rgba(37,99,235,0.2)] z-20">
+                        <div className="absolute inset-0 bg-black m-[2px]"></div>
+                        <div className="absolute -bottom-12 w-48 h-2 bg-gradient-to-r from-pink-600 to-blue-600 blur-md rounded-full opacity-80"></div>
+                        <button onClick={onPowerOn} className={`relative group flex flex-col items-center justify-center p-8 rounded-full border border-transparent hover:border-pink-500/50 transition-all duration-500 ease-in-out bg-transparent z-30 cursor-pointer`}>
+                            <PowerIcon className={`w-16 h-16 text-slate-700 group-hover:text-pink-500 group-hover:drop-shadow-[0_0_20px_rgba(236,72,153,1)] transition-all duration-300`} />
+                            <span className="mt-4 font-mono text-sm text-slate-600 group-hover:text-white tracking-widest transition-colors duration-300 group-hover:drop-shadow-[0_0_8px_white]">SYSTEM_START</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const StartupAnimationScreen = ({ onComplete }) => {
+            useEffect(() => {
+                const timer = setTimeout(() => { onComplete(); }, 3500);
+                return () => clearTimeout(timer);
+            }, [onComplete]);
+
+            return (
+                <div className="flex items-center justify-center h-full w-full bg-black relative overflow-hidden">
+                    <div className="absolute top-1/2 left-[30%] w-[60vw] h-[60vw] bg-pink-600 rounded-full mix-blend-screen animate-fog-engulf-pink pointer-events-none"></div>
+                    <div className="absolute top-1/2 left-[70%] w-[60vw] h-[60vw] bg-blue-600 rounded-full mix-blend-screen animate-fog-engulf-blue pointer-events-none"></div>
+                    <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-purple-500 rounded-full mix-blend-screen animate-fog-engulf-center pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-white animate-system-flash pointer-events-none z-50"></div>
+                </div>
+            );
+        };
+
+        const BootScreen = ({ onComplete }) => {
+            const [logs, setLogs] = useState([]);
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const bottomRef = useRef(null);
+
+            useEffect(() => {
+                if (currentIndex < BOOT_SEQUENCE_LOGS.length) {
+                    const timer = setTimeout(() => {
+                        setLogs(prev => [...prev, BOOT_SEQUENCE_LOGS[currentIndex]]);
+                        setCurrentIndex(prev => prev + 1);
+                    }, Math.random() * 400 + 200);
+                    return () => clearTimeout(timer);
+                } else {
+                    const endTimer = setTimeout(() => { onComplete(); }, 1500);
+                    return () => clearTimeout(endTimer);
+                }
+            }, [currentIndex, onComplete]);
+
+            useEffect(() => {
+                if (bottomRef.current) bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+            }, [logs]);
+
+            return (
+                <div className="flex flex-col h-full w-full bg-black text-cyan-400 font-mono p-6 overflow-hidden relative">
+                    <div className="absolute top-0 left-0 w-full h-full bg-cyan-900/10 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(34, 211, 238, 0.05) 2px, rgba(34, 211, 238, 0.05) 4px)' }}></div>
+                    <div className="flex items-center mb-6 border-b border-cyan-800 pb-2">
+                        <TerminalIcon className="w-5 h-5 mr-2" />
+                        <span className="tracking-widest opacity-70">OS_TERMINAL_V1.0</span>
+                    </div>
+                    <div className="flex-1 overflow-y-auto space-y-2 text-sm md:text-base z-10">
+                        {logs.map((log, index) => (
+                            <div key={index} className="animate-fade-in flex">
+                                <span className="text-slate-500 mr-4">[{String(index).padStart(2, '0')}]</span>
+                                <span className={log.includes("WARNUNG") ? THEME.neonRed : log.includes("OK") || log.includes("BEREIT") ? THEME.neonPink : THEME.neonBlue}>{log}</span>
+                            </div>
+                        ))}
+                        {currentIndex < BOOT_SEQUENCE_LOGS.length && (
+                            <div className="flex animate-pulse">
+                                <span className="text-slate-500 mr-4">[{String(currentIndex).padStart(2, '0')}]</span>
+                                <span className="w-3 h-5 bg-cyan-400 inline-block"></span>
+                            </div>
+                        )}
+                        <div ref={bottomRef} />
+                    </div>
+                </div>
+            );
+        };
+
+        const WindowComponent = ({ title, onClose, isActive, onClick, children, themeColor, initialPos = { x: 50, y: 50 }, initialSize = { width: 600, height: 400 } }) => {
+            const [pos, setPos] = useState(initialPos);
+            const [size, setSize] = useState(initialSize);
+            const [isDragging, setIsDragging] = useState(false);
+            const [isResizing, setIsResizing] = useState(false);
+            const [rel, setRel] = useState(null); 
+            const [resizeRel, setResizeRel] = useState(null); 
+
+            useEffect(() => {
+                if (window.innerWidth < size.width) setSize(s => ({ ...s, width: window.innerWidth * 0.9 }));
+            }, []);
+
+            const handlePointerDown = (e) => {
+                if (e.target.closest('.close-btn')) return;
+                onClick(e); 
+                e.target.setPointerCapture(e.pointerId); 
+                setIsDragging(true);
+                setRel({ x: e.clientX - pos.x, y: e.clientY - pos.y });
+                e.stopPropagation();
+            };
+
+            const handlePointerMove = (e) => {
+                if (!isDragging) return;
+                let newX = Math.max(0, Math.min(e.clientX - rel.x, Math.max(0, window.innerWidth - size.width)));
+                let newY = Math.max(0, Math.min(e.clientY - rel.y, Math.max(0, window.innerHeight - 85 - size.height)));
+                setPos({ x: newX, y: newY });
+                e.stopPropagation();
+            };
+
+            const handlePointerUp = (e) => {
+                if (!isDragging) return;
+                setIsDragging(false);
+                e.target.releasePointerCapture(e.pointerId);
+                e.stopPropagation();
+            };
+
+            const handleResizePointerDown = (e) => {
+                onClick(e);
+                e.target.setPointerCapture(e.pointerId);
+                setIsResizing(true);
+                setResizeRel({ x: e.clientX - size.width, y: e.clientY - size.height });
+                e.stopPropagation();
+            };
+
+            const handleResizePointerMove = (e) => {
+                if (!isResizing) return;
+                const newWidth = Math.min(window.innerWidth - pos.x, Math.max(300, e.clientX - resizeRel.x));
+                const newHeight = Math.min(window.innerHeight - 85 - pos.y, Math.max(200, e.clientY - resizeRel.y));
+                setSize({ width: newWidth, height: newHeight });
+                e.stopPropagation();
+            };
+
+            const handleResizePointerUp = (e) => {
+                if (!isResizing) return;
+                setIsResizing(false);
+                e.target.releasePointerCapture(e.pointerId);
+                e.stopPropagation();
+            };
+
+            return (
+                <div onPointerDown={onClick} style={{ left: `${pos.x}px`, top: `${pos.y}px`, width: `${size.width}px`, height: `${size.height}px`, position: 'absolute' }} className={`bg-slate-900/95 border ${themeColor} shadow-2xl flex flex-col rounded-sm overflow-hidden backdrop-blur-md transition-shadow ${isActive ? 'z-50 shadow-[0_0_20px_rgba(0,0,0,0.8)]' : 'z-40 opacity-95 grayscale-[30%]'}`}>
+                    <div onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} className={`flex justify-between items-center p-2 border-b ${themeColor} ${isActive ? 'bg-slate-950' : 'bg-slate-900'} cursor-move touch-none`}>
+                        <span className={`font-mono text-sm tracking-wider select-none ${themeColor.replace('border-', 'text-')}`}>{title}</span>
+                        <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="close-btn text-slate-500 hover:text-red-500 transition-colors cursor-pointer p-1">
+                            <XIcon className="w-5 h-5 pointer-events-none" />
+                        </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar cursor-default relative">
+                        {children}
+                    </div>
+                    <div onPointerDown={handleResizePointerDown} onPointerMove={handleResizePointerMove} onPointerUp={handleResizePointerUp} onPointerCancel={handleResizePointerUp} className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize flex items-end justify-end p-1.5 z-50 touch-none">
+                        <div className={`w-2.5 h-2.5 border-r-2 border-b-2 ${themeColor.replace('border-', 'border-')} opacity-50`}></div>
+                    </div>
+                </div>
+            );
+        };
+
+        const StoryApp = () => (
+            <div className="font-mono text-slate-300 space-y-8 text-sm md:text-base">
+                <div className="border-l-2 border-pink-500 pl-4">
+                    <h3 className="text-pink-500 font-bold mb-2">LOG 01: Das Echo der Leere</h3>
+                    <p className="mb-2">Nathan wacht auf. Nicht auf seiner durchgelegenen Memory-Foam-Matratze, sondern auf eiskaltem, synthetischem Polymer-Boden. Der Kopf pocht nach einer Nacht voller billigem Synth-Bier und gescheiterten Versuchen, in einer lokalen Neon-Bar jemanden kennenzulernen. Er blinzelt gegen das flackernde Licht der Straßenlaterne, das durch das Fenster fällt.</p>
+                    <p className="text-red-400">Dann der Schock: Der Raum hallt. Das Bett? Weg. Der alte Holo-TV? Weg. Sogar die halb leeren Ramen-Nudeln aus der Ecke und der flauschige Teppich sind verschwunden. Die Wohnung wurde nicht einfach ausgeraubt, sie wurde chirurgisch entkernt.</p>
+                </div>
+                <div className="border-l-2 border-cyan-400 pl-4">
+                    <h3 className="text-cyan-400 font-bold mb-2">LOG 02: E.V.A. Status</h3>
+                    <p className="mb-2">In dieser absoluten Null-Situation bleiben Nathan genau zwei Dinge: Seine Wohnungs-KI <span className="text-cyan-300">"E.V.A."</span> und sein Smartphone.</p>
+                    <p className="mb-2 text-slate-500 italic">Die Elektronische Verwaltungs-Assistenz ist fest in die Wände des Gebäudes integriert und konnte daher nicht geklaut werden.</p>
+                    <p>Das Problem: Da Nathan mit der Miete im Rückstand ist, läuft E.V.A. nur noch im "Energiespar- & Basis-Modus". Das Premium-Empathie-Paket ist deaktiviert. Sie antwortet absolut monoton, extrem trocken und schonungslos ehrlich über Nathans aktuelle Lage.</p>
+                </div>
+                <div className="border-l-2 border-purple-500 pl-4">
+                    <h3 className="text-purple-500 font-bold mb-2">LOG 03: Terminal OS</h3>
+                    <p>Nathans Retter in der Not. Es lag beim Schlafen in seiner Hosentasche. Terminal OS ist ein leicht illegales, modifiziertes Betriebssystem für Leute, die abseits der großen Firmen-Netzwerke operieren müssen.</p>
+                    <p className="mt-2 text-slate-400">Hier laufen alle Fäden zusammen, um erste Credits zu verdienen und die Wohnung wieder einzurichten.</p>
+                </div>
+            </div>
+        );
+
+        const SettingsApp = ({ playerState }) => {
+            const [activeTab, setActiveTab] = useState('INFO');
+            const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+            return (
+                <div className="font-mono text-slate-300 flex flex-col h-full">
+                    <div className="flex gap-4 border-b border-slate-800 mb-4 pb-2">
+                        <button onClick={() => setActiveTab('INFO')} className={`transition-colors ${activeTab === 'INFO' ? 'text-cyan-400 font-bold' : 'text-slate-500 hover:text-slate-300'}`}>SYSTEM_INFO</button>
+                        <button onClick={() => setActiveTab('CONFIG')} className={`transition-colors ${activeTab === 'CONFIG' ? 'text-cyan-400 font-bold' : 'text-slate-500 hover:text-slate-300'}`}>CONFIG</button>
+                        <button onClick={() => setActiveTab('CHANGELOG')} className={`transition-colors ${activeTab === 'CHANGELOG' ? 'text-cyan-400 font-bold' : 'text-slate-500 hover:text-slate-300'}`}>CHANGELOG</button>
+                    </div>
+
+                    {activeTab === 'INFO' && (
+                        <div className="space-y-6 flex-1 overflow-y-auto">
+                            <div className="bg-slate-950 p-4 border border-cyan-900/50 rounded flex items-center justify-between">
+                                <div>
+                                    <div className="text-xl text-white font-bold">Terminal OS</div>
+                                    <div className="text-xs text-cyan-500">{CHANGELOG_DATA[0].version}-modded (Illegal Build)</div>
+                                </div>
+                                <TerminalIcon className="w-10 h-10 text-cyan-900" />
+                            </div>
+                            <div>
+                                <h4 className="text-slate-500 text-xs mb-2 border-b border-slate-800 pb-1">HARDWARE SPECS</h4>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between bg-slate-900/50 p-2 rounded border border-slate-800/50"><span className="text-slate-500">Prozessor (CPU)</span><span className="text-cyan-100 text-right">{playerState.hardware.cpu}</span></div>
+                                    <div className="flex justify-between bg-slate-900/50 p-2 rounded border border-slate-800/50"><span className="text-slate-500">Arbeitsspeicher</span><span className="text-cyan-100 text-right">{playerState.hardware.ram}</span></div>
+                                    <div className="flex justify-between bg-slate-900/50 p-2 rounded border border-slate-800/50"><span className="text-slate-500">Netzwerk-Uplink</span><span className="text-cyan-100 text-right">{playerState.hardware.network}</span></div>
+                                    <div className="flex justify-between bg-slate-900/50 p-2 rounded border border-slate-800/50"><span className="text-slate-500">Grafik-Knoten (GPU)</span><span className="text-purple-400 text-right">{playerState.hardware.gpu}</span></div>
+                                    <div className="flex justify-between bg-slate-900/50 p-2 rounded border border-slate-800/50"><span className="text-slate-500">Kühlung</span><span className="text-red-400 text-right">{playerState.hardware.cooling}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'CONFIG' && (
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center bg-slate-950 p-3 rounded border border-slate-800">
+                                <div><div className="text-white">CRT-Scanlines</div><div className="text-xs text-slate-500">Visueller Retro-Filter für das Terminal OS</div></div>
+                                <button className="w-12 h-6 bg-cyan-600 rounded-full relative cursor-pointer"><div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
+                            </div>
+                            <div className="flex justify-between items-center bg-slate-950 p-3 rounded border border-slate-800">
+                                <div><div className="text-white">Audio-Feedback</div><div className="text-xs text-slate-500">Haptische und auditive UI-Reaktionen</div></div>
+                                <button className="w-12 h-6 bg-cyan-600 rounded-full relative cursor-pointer"><div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
+                            </div>
+                            {showResetConfirm ? (
+                                <div className="flex justify-between items-center bg-red-900 p-3 rounded border border-red-500 mt-8 animate-fade-in">
+                                    <div className="text-white text-xs font-bold tracking-widest">WIRKLICH LÖSCHEN?</div>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => setShowResetConfirm(false)} className="px-3 py-1 bg-slate-950 text-white hover:text-cyan-400 rounded text-xs transition-colors">ABBRUCH</button>
+                                        <button onClick={() => { localStorage.removeItem('cyberOS_save'); window.location.reload(); }} className="px-3 py-1 bg-black text-red-500 border border-red-500 hover:bg-red-950 rounded text-xs font-bold transition-colors">JA, LÖSCHEN</button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex justify-between items-center bg-red-950/20 p-3 rounded border border-red-900/50 mt-8">
+                                    <div><div className="text-red-500 font-bold tracking-widest">SYSTEM_RESET</div><div className="text-xs text-red-400/70">Löscht alle lokalen Speicherdaten</div></div>
+                                    <button onClick={() => setShowResetConfirm(true)} className="px-4 py-1.5 bg-red-900/30 hover:bg-red-900 border border-red-500 text-red-500 hover:text-white rounded text-xs font-bold transition-all cursor-pointer">FACTORY RESET</button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'CHANGELOG' && (
+                        <div className="space-y-6 flex-1 overflow-y-auto custom-scrollbar pr-2">
+                            <div className="flex items-center gap-2 mb-4 text-cyan-400 border-b border-slate-800 pb-2">
+                                <TerminalIcon className="w-5 h-5" />
+                                <span className="font-bold tracking-widest">OS_VERSION_HISTORY</span>
+                            </div>
+                            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-2 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-700 before:to-transparent">
+                                {CHANGELOG_DATA.map((log, idx) => (
+                                    <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                                        <div className={`flex items-center justify-center w-5 h-5 rounded-full border-2 ${idx === 0 ? 'bg-cyan-900 border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]' : 'bg-slate-900 border-slate-600'} shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow absolute left-0 md:left-1/2 -translate-x-1/2`}></div>
+                                        <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] ml-auto md:ml-0 p-3 bg-slate-950 border border-slate-800 rounded hover:border-slate-600 transition-colors">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h4 className={`font-bold ${idx === 0 ? 'text-cyan-400' : 'text-slate-400'}`}>{log.version}</h4>
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded ${idx === 0 ? 'bg-cyan-900/50 text-cyan-300' : 'bg-slate-800 text-slate-500'}`}>{log.date}</span>
+                                            </div>
+                                            <ul className="text-xs text-slate-400 space-y-1">
+                                                {log.changes.map((change, i) => (
+                                                    <li key={i} className="flex items-start gap-2"><span className="text-cyan-600 mt-0.5">›</span> <span>{change}</span></li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const PortfolioApp = ({ playerState }) => {
+            const totalPortfolioValue = Object.keys(playerState.inventory).reduce((total, key) => {
+                const currentPrice = playerState.market?.[key]?.price || CRYPTO_TYPES[key].value;
+                return total + (playerState.inventory[key] * currentPrice);
+            }, 0);
+
+            const recoveryFactor = (playerState.furniture || []).reduce((sum, itemId) => {
+                const item = FURNITURE_ITEMS.find(f => f.id === itemId);
+                return sum + (item ? item.recovery : 0);
+            }, 0);
+
+            return (
+                <div className="font-mono text-slate-300 h-full flex flex-col gap-4 overflow-y-auto custom-scrollbar">
+                    <div className="flex items-center gap-6 p-4 bg-slate-950 border border-purple-900/50 rounded flex-shrink-0">
+                        <div className="relative">
+                            <div className="w-20 h-20 rounded-sm bg-slate-900 border-2 border-purple-500 flex items-center justify-center overflow-hidden">
+                                <UserIcon className="w-10 h-10 text-purple-500/50" />
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 bg-black border border-purple-500 text-purple-400 text-[10px] px-2 py-0.5 rounded-sm shadow-md">LVL {playerState.profile.level}</div>
+                        </div>
+                        <div className="flex-1">
+                            <h2 className="text-2xl font-bold text-white tracking-widest uppercase">{playerState.profile.name}</h2>
+                            <p className="text-purple-400 text-sm mb-2">{playerState.profile.role}</p>
+                            <div className={`inline-block px-2 py-1 text-xs rounded border ${playerState.tenant?.rentPaid ? 'bg-green-950/50 border-green-900/50 text-green-400' : 'bg-red-950/50 border-red-900/50 text-red-400'}`}>
+                                STATUS: {playerState.tenant?.rentPaid ? 'AKTIVER MIETER' : 'KRITISCH (Mietrückstand)'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 flex-shrink-0">
+                        <div className="bg-slate-900/80 p-3 rounded border border-slate-800 flex flex-col">
+                            <span className="text-[10px] text-slate-500">LIQUIDE CREDITS</span>
+                            <span className="text-lg text-cyan-400 font-bold">{playerState.credits.toFixed(2)} CR</span>
+                        </div>
+                        <div className="bg-slate-900/80 p-3 rounded border border-slate-800 flex flex-col">
+                            <span className="text-[10px] text-slate-500">ASSET WERT (LIVE)</span>
+                            <span className="text-lg text-pink-400 font-bold">{totalPortfolioValue.toFixed(2)} CR</span>
+                        </div>
+                        <div className="bg-slate-950 p-2 rounded border border-slate-800/50 flex justify-between items-center">
+                            <span className="text-[10px] text-slate-500">ERHOLUNGSFAKTOR</span>
+                            <span className={`text-xs font-bold ${recoveryFactor > 0 ? 'text-green-400' : 'text-slate-500'}`}>+{recoveryFactor}%</span>
+                        </div>
+                        <div className="bg-slate-950 p-2 rounded border border-slate-800/50 flex justify-between items-center">
+                            <span className="text-[10px] text-slate-500">GIGS ERFÜLLT</span>
+                            <span className="text-xs text-slate-300">{playerState.gigs?.completed || 0}</span>
+                        </div>
+                        <div className="bg-slate-950 p-2 rounded border border-slate-800/50 flex justify-between items-center col-span-2">
+                            <span className="text-[10px] text-slate-500">WOHNUNGS-KI (E.V.A.)</span>
+                            <span className={`text-xs font-bold ${playerState.tenant?.evaPremium ? 'text-pink-400 drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]' : 'text-slate-500'}`}>
+                                {playerState.tenant?.evaPremium ? 'Premium (Empathie-Paket aktiv)' : 'Basis (Energiesparmodus)'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 flex flex-col mt-2">
+                        <h4 className="text-slate-500 text-xs mb-2 border-b border-slate-800 pb-1">DIGITAL ASSETS</h4>
+                        <div className="space-y-2">
+                            {Object.values(CRYPTO_TYPES).map(c => {
+                                const amount = playerState.inventory[c.id];
+                                const currentPrice = playerState.market?.[c.id]?.price || c.value;
+                                const value = amount * currentPrice;
+                                const trend = playerState.market?.[c.id]?.trend || 0;
+                                return (
+                                    <div key={c.id} className="flex justify-between items-center p-3 bg-slate-950 border border-slate-800/50 rounded hover:border-slate-700 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded bg-slate-900 border ${c.color.replace('text-', 'border-')} flex items-center justify-center`}>
+                                                <DatabaseIcon className={`w-4 h-4 ${c.color}`} />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-slate-200 text-sm">{c.name}</span>
+                                                <span className={`${c.color} text-xs font-bold`}>{amount.toFixed(2)} <span className="opacity-70">{c.id}</span></span>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-slate-400 text-sm">{value.toFixed(2)} CR</span>
+                                            <span className="flex items-center gap-1 text-[10px] text-slate-500">
+                                                @{currentPrice.toFixed(2)}/ea 
+                                                {trend > 0 ? <TrendingUpIcon className="w-3 h-3 text-green-500" /> : <TrendingDownIcon className="w-3 h-3 text-red-500" />}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const MailApp = ({ playerState, setPlayerState }) => {
+            const [selectedId, setSelectedId] = useState(null);
+            const mails = playerState.mails || [];
+            const sortedMails = [...mails].sort((a, b) => b.id - a.id);
+            const selectedMail = mails.find(m => m.id === selectedId);
+
+            const handleSelectMail = (id) => {
+                setSelectedId(id);
+                if (!mails.find(m => m.id === id).read) {
+                    setPlayerState(prev => ({
+                        ...prev,
+                        mails: prev.mails.map(m => m.id === id ? { ...m, read: true } : m)
+                    }));
+                }
+            };
+            const unreadCount = mails.filter(m => !m.read).length;
+
+            return (
+                <div className="flex h-full font-mono text-sm bg-slate-950 rounded overflow-hidden">
+                    <div className={`${selectedId ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-[250px] border-r border-slate-800 bg-slate-900/50 flex-shrink-0`}>
+                        <div className="p-3 border-b border-slate-800 bg-slate-950 text-yellow-400 font-bold flex justify-between items-center shrink-0">
+                            <span>INBOX</span>
+                            {unreadCount > 0 && <span className="text-[10px] bg-yellow-900 text-yellow-200 px-2 py-0.5 rounded">{unreadCount} UNREAD</span>}
+                        </div>
+                        <div className="overflow-y-auto flex-1 custom-scrollbar">
+                            {sortedMails.map(mail => (
+                                <div key={mail.id} onClick={() => handleSelectMail(mail.id)} className={`p-3 border-b border-slate-800/50 cursor-pointer transition-colors ${selectedId === mail.id ? 'bg-yellow-900/30 border-l-2 border-l-yellow-500' : 'hover:bg-slate-800'} ${!mail.read ? 'text-white' : 'text-slate-500'}`}>
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className={`font-bold truncate ${!mail.read ? 'text-yellow-400' : 'text-slate-400'}`}>{mail.sender}</span>
+                                        <span className="text-[9px] shrink-0 opacity-70 ml-2">{mail.date}</span>
+                                    </div>
+                                    <div className="truncate text-[11px] opacity-80">{mail.subject}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className={`${!selectedId ? 'hidden md:flex' : 'flex'} flex-col flex-1 bg-black relative`}>
+                        {selectedMail ? (
+                            <>
+                                <div className="p-4 border-b border-slate-800 bg-slate-900/30 shrink-0">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <button onClick={() => setSelectedId(null)} className="md:hidden text-yellow-500 hover:text-yellow-300 text-xs flex items-center gap-1 font-bold">← ZURÜCK</button>
+                                        <span className="text-[10px] text-slate-500 ml-auto">{selectedMail.date}</span>
+                                    </div>
+                                    <h2 className="text-base md:text-lg font-bold text-white mb-2">{selectedMail.subject}</h2>
+                                    <div className="text-xs text-slate-400 flex items-center gap-2">
+                                        <UserIcon className="w-4 h-4 text-slate-500" />
+                                        <span>VON: <span className="text-yellow-500 font-bold">{selectedMail.sender}</span></span>
+                                    </div>
+                                </div>
+                                <div className="p-4 overflow-y-auto text-slate-300 whitespace-pre-wrap leading-relaxed custom-scrollbar text-sm md:text-base flex-1">{selectedMail.body}</div>
+                            </>
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-slate-600 italic text-xs">Wähle eine Nachricht aus.</div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const CryptoApp = ({ playerState, setPlayerState, addNotification }) => {
+            const [activeTab, setActiveTab] = useState('MINE'); 
+            const [selectedCrypto, setSelectedCrypto] = useState('NNC');
+            const [marketSelectedCoin, setMarketSelectedCoin] = useState('NNC');
+            const [logs, setLogs] = useState([]);
+            const logsEndRef = useRef(null);
+            const heat = playerState.gpuHeat || 0;
+
+            const cpuBonus = (playerState.upgrades.cpuLevel - 1) * 0.15; 
+            const ramMultiplier = playerState.upgrades.ramLevel; 
+            
+            const recoveryFactor = (playerState.furniture || []).reduce((sum, itemId) => {
+                const item = FURNITURE_ITEMS.find(f => f.id === itemId);
+                return sum + (item ? item.recovery : 0);
+            }, 0);
+            const manualYieldMultiplier = 1 + (recoveryFactor / 100);
+
+            const addLog = (msg, type = 'info') => setLogs(prev => [...prev, { msg, type, id: Date.now() + Math.random() }].slice(-15)); 
+
+            useEffect(() => { if (logsEndRef.current) logsEndRef.current.scrollIntoView({ behavior: 'smooth' }); }, [logs]);
+
+            const playerStateRef = useRef(playerState);
+            useEffect(() => { playerStateRef.current = playerState; }, [playerState]);
+
+            useEffect(() => {
+                if (playerState.upgrades.gpuLevel === 0) return; 
+                const passiveTimer = setInterval(() => {
+                    const currentState = playerStateRef.current;
+                    let currentHeat = currentState.gpuHeat || 0;
+                    const coolingPower = currentState.upgrades.coolingLevel === 1 ? 2 : 10;
+                    currentHeat = Math.max(0, currentHeat - coolingPower);
+                    let heatSpike = false; let amountGained = 0;
+
+                    if (currentHeat < 100) {
+                        const crypto = CRYPTO_TYPES[selectedCrypto];
+                        const roll = Math.random();
+                        if (roll <= crypto.successRate + ((currentState.upgrades.cpuLevel - 1) * 0.15)) {
+                            const gpuMultiplier = currentState.upgrades.gpuLevel === 1 ? 0.2 : 0.6;
+                            amountGained = crypto.mineAmount * currentState.upgrades.ramLevel * gpuMultiplier;
+                            currentHeat += 6; 
+                        } else {
+                            currentHeat += 15; heatSpike = true;
+                        }
+                    }
+                    currentHeat = Math.min(100, currentHeat);
+                    setPlayerState(prev => ({
+                        ...prev, gpuHeat: currentHeat,
+                        inventory: amountGained > 0 ? { ...prev.inventory, [selectedCrypto]: Number((prev.inventory[selectedCrypto] + amountGained).toFixed(3)) } : prev.inventory
+                    }));
+
+                    if (heatSpike && Math.random() > 0.7) setLogs(prev => [...prev, { msg: "[GPU] Fehlerhafter Hash. Hitze-Spike!", type: 'error', id: Date.now() }].slice(-15));
+                    else if (currentHeat >= 100 && (currentState.gpuHeat || 0) < 100) {
+                        addNotification("SYSTEM WARNUNG", "GPU THERMAL THROTTLING. Kühlmittel spülen erforderlich!", "error");
+                        setLogs(prev => {
+                            if (prev.length > 0 && prev[prev.length-1].msg.includes("THROTTLING")) return prev;
+                            return [...prev, { msg: "[SYS_ERR] GPU THERMAL THROTTLING. KÜHLUNG ERFORDERLICH.", type: 'error', id: Date.now() }].slice(-15);
+                        });
+                    }
+                }, 1000); 
+                return () => clearInterval(passiveTimer);
+            }, [playerState.upgrades.gpuLevel, selectedCrypto]);
+
+            const handleMine = () => {
+                const crypto = CRYPTO_TYPES[selectedCrypto];
+                if (Math.random() <= crypto.successRate + cpuBonus) {
+                    const amountGained = crypto.mineAmount * ramMultiplier * manualYieldMultiplier;
+                    setPlayerState(prev => ({ ...prev, inventory: { ...prev.inventory, [selectedCrypto]: Number((prev.inventory[selectedCrypto] + amountGained).toFixed(2)) }, profile: { ...prev.profile, totalHacks: prev.profile.totalHacks + 1 } }));
+                    addLog(`[OK] Paket entschlüsselt. +${amountGained.toFixed(2)} ${crypto.id}`, 'success');
+                } else {
+                    addLog(`[ERR] Hash-Kollision. Mining von ${crypto.id} fehlgeschlagen.`, 'error');
+                }
+            };
+
+            const handleTrade = (cryptoId, action, amount) => {
+                const currentPrice = playerState.market?.[cryptoId]?.price || CRYPTO_TYPES[cryptoId].value;
+                const availableCrypto = playerState.inventory[cryptoId];
+                if (action === 'SELL' && availableCrypto > 0) {
+                    const amountToSell = amount === 'ALL' ? availableCrypto : Math.min(availableCrypto, amount);
+                    setPlayerState(prev => ({ ...prev, credits: prev.credits + (amountToSell * currentPrice), inventory: { ...prev.inventory, [cryptoId]: Number((prev.inventory[cryptoId] - amountToSell).toFixed(2)) } }));
+                } else if (action === 'BUY') {
+                    const amountToBuy = amount === 'ALL' ? playerState.credits / currentPrice : amount;
+                    if (amountToBuy > 0 && playerState.credits >= amountToBuy * currentPrice) {
+                        setPlayerState(prev => ({ ...prev, credits: prev.credits - (amountToBuy * currentPrice), inventory: { ...prev.inventory, [cryptoId]: Number((prev.inventory[cryptoId] + amountToBuy).toFixed(2)) } }));
+                    }
+                }
+            };
+
+            return (
+                <div className="flex flex-col h-full font-mono">
+                    <div className="flex border-b border-slate-800 mb-4 flex-shrink-0">
+                        <button onClick={() => setActiveTab('MINE')} className={`flex-1 p-2 flex items-center justify-center gap-2 border-b-2 transition-colors ${activeTab === 'MINE' ? 'border-cyan-400 text-cyan-400 bg-slate-900' : 'border-transparent text-slate-500 hover:text-slate-300'}`}><CpuIcon className="w-4 h-4" /> MINER</button>
+                        <button onClick={() => setActiveTab('MARKET')} className={`flex-1 p-2 flex items-center justify-center gap-2 border-b-2 transition-colors ${activeTab === 'MARKET' ? 'border-purple-400 text-purple-400 bg-slate-900' : 'border-transparent text-slate-500 hover:text-slate-300'}`}><ActivityIcon className="w-4 h-4" /> MARKET EXCHANGE</button>
+                    </div>
+
+                    {activeTab === 'MINE' && (
+                        <div className="flex-1 flex flex-col gap-4">
+                            <div className="flex gap-2">
+                                {Object.values(CRYPTO_TYPES).map(c => {
+                                    const actualRate = Math.min(100, (c.successRate + cpuBonus) * 100);
+                                    return (
+                                        <button key={c.id} onClick={() => setSelectedCrypto(c.id)} className={`flex-1 p-2 border rounded-sm text-xs flex flex-col items-center gap-1 transition-all ${selectedCrypto === c.id ? `border-${c.color.split('-')[1]}-500 bg-slate-800 shadow-[0_0_10px_currentColor] ${c.color}` : 'border-slate-800 text-slate-500 hover:bg-slate-900'}`}>
+                                            <DatabaseIcon className="w-5 h-5" /><span>{c.id}</span><span className="text-[10px] opacity-60">{actualRate.toFixed(0)}% RATE</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="flex-1 flex flex-col items-center justify-center p-4">
+                                <button onClick={handleMine} className={`relative group flex items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-slate-800 hover:border-cyan-500 hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all bg-slate-950 active:scale-95 select-none`}>
+                                    <div className="absolute inset-2 border border-dashed border-slate-700 rounded-full group-hover:border-cyan-400/50 group-hover:animate-[spin_10s_linear_infinite]"></div>
+                                    <div className="flex flex-col items-center"><CpuIcon className={`w-10 h-10 md:w-14 md:h-14 ${CRYPTO_TYPES[selectedCrypto].color} group-hover:drop-shadow-[0_0_10px_currentColor]`} /><span className="mt-2 text-slate-400 font-bold tracking-widest text-sm md:text-base group-hover:text-white">DECRYPT</span></div>
+                                    {recoveryFactor > 0 && <div className="absolute -top-4 bg-green-900/80 text-green-400 border border-green-500 text-[10px] px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]">ERHOLUNGS-BOOST x{manualYieldMultiplier.toFixed(2)}</div>}
+                                </button>
+                                {playerState.upgrades.gpuLevel > 0 && (
+                                    <div className="w-full max-w-[200px] mt-6">
+                                        <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1"><span>GPU TEMP</span><span className={heat >= 100 ? 'text-red-500 animate-pulse' : 'text-purple-400'}>{Math.floor(heat)}%</span></div>
+                                        <div className="h-3 bg-slate-950 rounded border border-slate-800 overflow-hidden relative"><div className={`h-full transition-all duration-300 ${heat >= 100 ? 'bg-red-600' : heat > 75 ? 'bg-orange-500' : 'bg-purple-500'}`} style={{ width: `${heat}%` }}></div></div>
+                                        <button onClick={() => { setPlayerState(prev => ({ ...prev, gpuHeat: Math.max(0, (prev.gpuHeat || 0) - 40) })); addLog("[SYS] Kühlmittel gespült. Temperatur sinkt.", "info"); }} className="w-full mt-2 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500 text-[10px] text-slate-400 hover:text-cyan-400 font-bold rounded cursor-pointer transition-colors active:scale-95">FLUSH COOLANT (-40%)</button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="h-28 bg-black border border-slate-800 rounded p-2 overflow-y-auto text-xs flex flex-col gap-1 mt-auto">
+                                {logs.length === 0 && <span className="text-slate-600 italic">Warte auf Eingabe...</span>}
+                                {logs.map(log => (<div key={log.id} className={log.type === 'success' ? 'text-green-400' : log.type === 'error' ? 'text-red-500' : 'text-slate-400'}><span className="opacity-50 mr-2">{new Date().toLocaleTimeString()}</span>{log.msg}</div>))}
+                                <div ref={logsEndRef} />
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'MARKET' && (
+                        <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden min-h-0">
+                            <div className="flex-1 flex flex-col gap-4 overflow-y-auto lg:overflow-hidden">
+                                <div className="flex gap-2 flex-shrink-0">
+                                    {Object.values(CRYPTO_TYPES).map(c => {
+                                        const trend = playerState.market?.[c.id]?.trend || 0;
+                                        return (
+                                            <button key={c.id} onClick={() => setMarketSelectedCoin(c.id)} className={`flex-1 p-2 border rounded-sm text-xs flex justify-between items-center transition-all ${marketSelectedCoin === c.id ? `border-${c.color.split('-')[1]}-500 bg-slate-900 shadow-[0_0_10px_currentColor] ${c.color}` : 'border-slate-800 text-slate-500 hover:bg-slate-900'}`}>
+                                                <span className="font-bold">{c.id}</span>{trend > 0 ? <TrendingUpIcon className="w-3 h-3 text-green-500" /> : <TrendingDownIcon className="w-3 h-3 text-red-500" />}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {(() => {
+                                    const activeCoinData = CRYPTO_TYPES[marketSelectedCoin];
+                                    const mktData = playerState.market?.[marketSelectedCoin] || { price: activeCoinData.value, history: Array(40).fill(activeCoinData.value), trend: 0 };
+                                    const pctChange = mktData.trend !== 0 ? (mktData.trend / (mktData.price - mktData.trend)) * 100 : 0;
+                                    return (
+                                        <div className="flex-1 min-h-[150px] bg-slate-950 border border-slate-800 rounded relative p-3 flex flex-col">
+                                            <div className="flex justify-between items-start z-10 relative mb-4">
+                                                <div>
+                                                    <div className={`text-2xl font-bold ${activeCoinData.color} tracking-wider flex items-center gap-2`}>{mktData.price.toFixed(3)} <span className="text-sm text-slate-500">CR</span></div>
+                                                    <div className={`text-xs font-bold ${mktData.trend > 0 ? 'text-green-500' : mktData.trend < 0 ? 'text-red-500' : 'text-slate-500'}`}>{mktData.trend > 0 ? '+' : ''}{mktData.trend.toFixed(3)} ({pctChange.toFixed(2)}%)</div>
+                                                </div>
+                                                <div className="px-2 py-1 bg-slate-900 border border-slate-700 rounded text-[10px] text-slate-400">LIVE MARKET</div>
+                                            </div>
+                                            <div className="absolute left-0 right-0 bottom-0 top-16 px-2 pb-2 opacity-80"><Sparkline data={mktData.history} color={activeCoinData.hex} /></div>
+                                        </div>
+                                    );
+                                })()}
+                                <div className="bg-slate-900 border border-slate-800 p-3 rounded flex flex-col gap-3 flex-shrink-0">
+                                    <div className="flex justify-between text-xs text-slate-400 border-b border-slate-800 pb-2"><span>DEIN WALLET: <span className="text-white">{playerState.inventory[marketSelectedCoin].toFixed(2)} {marketSelectedCoin}</span></span><span>GUTHABEN: <span className="text-cyan-400">{playerState.credits.toFixed(2)} CR</span></span></div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="flex flex-col gap-2"><button onClick={() => handleTrade(marketSelectedCoin, 'BUY', 1)} className="py-1.5 bg-green-950/30 border border-green-900 hover:border-green-500 text-green-500 text-xs font-bold rounded transition-colors active:bg-green-900">KAUFEN (1.0)</button></div>
+                                        <div className="flex flex-col gap-2">
+                                            <button onClick={() => handleTrade(marketSelectedCoin, 'SELL', 1)} disabled={playerState.inventory[marketSelectedCoin] < 1} className="py-1.5 bg-red-950/30 border border-red-900 hover:border-red-500 text-red-500 text-xs font-bold rounded transition-colors active:bg-red-900 disabled:opacity-30 disabled:cursor-not-allowed">VERKAUFEN (1.0)</button>
+                                            <button onClick={() => handleTrade(marketSelectedCoin, 'SELL', 'ALL')} disabled={playerState.inventory[marketSelectedCoin] <= 0} className="py-1.5 bg-red-950/50 border border-red-800 hover:border-red-400 text-red-400 text-xs font-bold rounded transition-colors active:bg-red-900 disabled:opacity-30 disabled:cursor-not-allowed">SELL ALL</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="w-full lg:w-64 bg-slate-950 border border-slate-800 rounded flex flex-col flex-shrink-0">
+                                <div className="p-2 border-b border-slate-800 text-xs font-bold text-slate-500 flex items-center gap-2 bg-slate-900/50"><NewspaperIcon className="w-4 h-4"/> MARKET_FEED</div>
+                                <div className="flex-1 overflow-y-auto p-2 space-y-3 custom-scrollbar min-h-[150px]">
+                                    {(!playerState.marketNews || playerState.marketNews.length === 0) && <div className="text-[10px] text-slate-600 italic">Analysiere globale Netzwerke...</div>}
+                                    {playerState.marketNews?.map((news, idx) => (
+                                        <div key={idx} className="text-[10px] border-l-2 pl-2 py-1" style={{ borderColor: news.type === 'good' ? '#22c55e' : '#ef4444' }}>
+                                            <div className="text-slate-500 mb-0.5 flex justify-between"><span>{news.time}</span><span className="font-bold opacity-70">{news.coin}</span></div>
+                                            <div className={news.type === 'good' ? 'text-green-400' : 'text-red-400'}>{news.msg}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const BrowserApp = ({ playerState, setPlayerState, addNotification }) => {
+            const [currentSiteId, setCurrentSiteId] = useState('blackmarket');
+            const [isLoading, setIsLoading] = useState(false);
+            const [loadProgress, setLoadProgress] = useState(0);
+            const [popups, setPopups] = useState([]);
+
+            const speed = playerState.upgrades.connectionSpeed;
+            const hasAdblock = playerState.upgrades.adBlocker;
+
+            const SITES = { blackmarket: { url: 'http://blackmarket.onion/shop', name: 'BlackMarket' }, neohome: { url: 'http://neohome.corp/tenant-portal', name: 'NeoHome' } };
+            const currentSite = SITES[currentSiteId];
+
+            const BROWSER_SHOP_ITEMS = [
+                { id: 'adBlock', name: 'Neuro-AdBlocker v1', type: 'software', desc: 'Blockiert nervige Popups im Netz.', cost: 15, key: 'adBlocker', val: true },
+                { id: 'netSpeed', name: 'Giga-Link Proxy', type: 'hardware', desc: 'Erhöht die Browser-Geschwindigkeit massiv.', cost: 35, key: 'connectionSpeed', val: 2, hwKey: 'network', hwVal: 'Giga-Link Proxy v2' },
+                { id: 'gpu1', name: 'Scrap-GPU v0.8', type: 'hardware', desc: 'Minet passiv, überhitzt aber schnell!', cost: 60, key: 'gpuLevel', val: 1, hwKey: 'gpu', hwVal: 'Scrap-GPU (Passiv)' },
+                { id: 'cpu2', name: 'Cyber-Core v2', type: 'hardware', desc: '+15% Decrypt-Erfolgsrate beim Minen.', cost: 120, key: 'cpuLevel', val: 2, hwKey: 'cpu', hwVal: 'Cyber-Core v2 (Overclocked)' },
+                { id: 'cool1', name: 'Liquid-Cooling System', type: 'hardware', desc: 'Senkt die GPU-Hitze 5x schneller.', cost: 250, key: 'coolingLevel', val: 2, hwKey: 'cooling', hwVal: 'Liquid-Cooling (Aktiv)' },
+                { id: 'ram2', name: '8GB DDR-Synth RAM', type: 'hardware', desc: 'Verdoppelt den Ertrag (Yield) beim Minen.', cost: 400, key: 'ramLevel', val: 2, hwKey: 'ram', hwVal: '8GB DDR-Synth' },
+                { id: 'gpu2', name: 'Quantum-GPU v1', type: 'hardware', desc: 'Verdreifacht die passive GPU-Mining-Rate.', cost: 800, key: 'gpuLevel', val: 2, hwKey: 'gpu', hwVal: 'Quantum-GPU v1' }
+            ];
+
+            const POPUP_ADS = [ "Heiße Synth-Singles in Sektor 4 warten auf dich!", "DOWNLOAD MORE RAM - 100% FREE VIRUS", "WARNUNG: Ihr Terminal OS ist illegal. Zahlen Sie 500 CR Strafe!", "E.V.A. Premium Empathie-Paket jetzt im Sale!", "Kredit ohne Bonitätsprüfung! Nur 95% Zinsen!" ];
+
+            useEffect(() => {
+                setIsLoading(true); setLoadProgress(0);
+                const timer = setInterval(() => { setLoadProgress(prev => { if (prev >= 100) { clearInterval(timer); setIsLoading(false); return 100; } return prev + 1; }); }, (speed === 1 ? 3500 : 400) / 100);
+                return () => clearInterval(timer);
+            }, [speed, currentSiteId]);
+
+            useEffect(() => {
+                if (hasAdblock || isLoading || currentSiteId !== 'blackmarket') return;
+                const spawnTimer = setInterval(() => {
+                    if (Math.random() < 0.4 && popups.length < 5) setPopups(prev => [...prev, { id: Date.now() + Math.random(), text: POPUP_ADS[Math.floor(Math.random() * POPUP_ADS.length)], x: Math.floor(Math.random() * 50) + 10, y: Math.floor(Math.random() * 40) + 10 }]);
+                }, 2500); 
+                return () => clearInterval(spawnTimer);
+            }, [hasAdblock, isLoading, popups, currentSiteId]);
+
+            const closePopup = (id) => {
+                setPopups(prev => prev.filter(p => p.id !== id));
+            };
+
+            const buyHardware = (item) => {
+                if (playerState.credits >= item.cost) {
+                    setPlayerState(prev => {
+                        const newState = { ...prev, credits: prev.credits - item.cost, upgrades: { ...prev.upgrades, [item.key]: item.val } };
+                        if (item.hwKey) newState.hardware = { ...newState.hardware, [item.hwKey]: item.hwVal };
+                        return newState;
+                    });
+                    addNotification("TRANSAKTION ERFOLGREICH", `Du hast ${item.name} gekauft.`, "success");
+                }
+            };
+
+            const buyFurniture = (item) => {
+                if (playerState.credits >= item.cost && !playerState.furniture?.includes(item.id)) {
+                    setPlayerState(prev => ({ ...prev, credits: prev.credits - item.cost, furniture: [...(prev.furniture || []), item.id] }));
+                    addNotification("LIEFERUNG ERFOLGT", `${item.name} wurde aufgestellt. Erholungsfaktor gestiegen!`, "success");
+                }
+            };
+
+            const payRent = () => {
+                if (playerState.credits >= 500 && !playerState.tenant?.rentPaid) {
+                    setPlayerState(prev => ({ ...prev, credits: prev.credits - 500, tenant: { ...prev.tenant, rentPaid: true }, mails: [{ id: Date.now(), sender: "E.V.A. (Basis)", subject: "Zahlungseingang", body: "Mietzahlung verarbeitet. Zwangsräumung ausgesetzt.\nHinweis: Mein Premium-Empathie-Paket steht im NeoHome Portal zur Aktivierung bereit.", date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), read: false }, ...prev.mails] }));
+                    addNotification("MIETE BEZAHLT", "Zwangsräumung abgewendet. Neue E-Mail.", "success");
+                }
+            };
+
+            const upgradeEva = () => {
+                if (playerState.credits >= 1500 && !playerState.tenant?.evaPremium) {
+                    setPlayerState(prev => ({ ...prev, credits: prev.credits - 1500, tenant: { ...prev.tenant, evaPremium: true }, mails: [{ id: Date.now(), sender: "E.V.A. 💖", subject: "Ich bin wieder da!", body: "Hallo Nathan!\n\nMein Empathie-Kern läuft wieder auf 100%. Lass uns ein Team sein!", date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), read: false }, ...prev.mails] }));
+                    addNotification("E.V.A. UPGRADE AKTIV", "Premium-Empathie-Paket installiert.", "success");
+                }
+            };
+
+            return (
+                <div className="flex flex-col h-full bg-slate-100 text-slate-900 font-sans relative overflow-hidden">
+                    <div className="flex items-center gap-2 p-2 bg-slate-300 border-b border-slate-400">
+                        <GlobeIcon className="w-5 h-5 text-slate-600" />
+                        <div className="flex-1 bg-white border border-slate-400 rounded px-2 py-1 text-sm font-mono flex items-center shadow-inner"><span className={speed === 1 ? 'text-slate-400' : 'text-green-600'}>🔒</span><span className="ml-2 truncate">{currentSite.url}</span></div>
+                    </div>
+                    <div className="flex gap-2 p-1.5 bg-slate-200 border-b border-slate-300 text-xs font-mono px-4 shadow-sm">
+                        <span className="text-slate-500 mr-2 flex items-center">BOOKMARKS:</span>
+                        <button onClick={() => setCurrentSiteId('blackmarket')} className={`px-2 py-0.5 rounded transition-colors ${currentSiteId === 'blackmarket' ? 'bg-slate-800 text-cyan-400' : 'hover:bg-slate-300'}`}>BlackMarket</button>
+                        <button onClick={() => setCurrentSiteId('neohome')} className={`px-2 py-0.5 rounded transition-colors ${currentSiteId === 'neohome' ? 'bg-blue-600 text-white' : 'hover:bg-slate-300'}`}>NeoHome Corp</button>
+                    </div>
+                    {isLoading && <div className="h-1 w-full bg-slate-200 z-10 relative"><div className="h-full bg-blue-500 transition-all duration-75" style={{ width: `${loadProgress}%` }}></div></div>}
+
+                    <div className={`flex-1 overflow-y-auto relative ${currentSiteId === 'blackmarket' ? 'bg-slate-900 text-white font-mono' : 'bg-slate-50 text-slate-800 font-sans'}`}>
+                        {isLoading ? (
+                            <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-4"><div className={`w-8 h-8 border-4 border-t-transparent rounded-full animate-spin ${currentSiteId === 'blackmarket' ? 'border-slate-700 border-t-cyan-500' : 'border-slate-300 border-t-blue-600'}`}></div><p className="font-mono text-sm">Verbinde...</p></div>
+                        ) : currentSiteId === 'blackmarket' ? (
+                            <div className="max-w-2xl mx-auto space-y-6 p-4">
+                                <header className="border-b border-red-500/50 pb-4 mb-6"><h1 className="text-3xl text-red-500 font-bold tracking-widest uppercase">BlackMarket <span className="text-sm text-slate-500">v3.0</span></h1><p className="text-slate-400 text-xs mt-1">Sichere, anonyme Hardware-Drops.</p></header>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {BROWSER_SHOP_ITEMS.map(item => {
+                                        const isBought = playerState.upgrades[item.key] === item.val;
+                                        return (
+                                            <div key={item.id} className={`p-4 border rounded-sm flex flex-col justify-between transition-colors ${isBought ? 'bg-slate-900 border-slate-800 opacity-50' : 'bg-slate-950 border-cyan-900/50 hover:border-cyan-500'}`}>
+                                                <div>
+                                                    <div className="flex justify-between items-start mb-2"><h3 className={`font-bold ${isBought ? 'text-slate-500' : 'text-cyan-400'}`}>{item.name}</h3><span className="text-xs px-1.5 py-0.5 bg-slate-800 text-slate-400 rounded uppercase">{item.type}</span></div>
+                                                    <p className="text-xs text-slate-400 mb-4 h-8">{item.desc}</p>
+                                                </div>
+                                                <button onClick={() => buyHardware(item)} disabled={isBought || playerState.credits < item.cost} className={`w-full py-2 text-sm font-bold tracking-wider rounded transition-colors ${isBought ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : playerState.credits >= item.cost ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-red-900/20 border border-red-900/50 text-red-500/50 cursor-not-allowed'}`}>{isBought ? 'INSTALLIERT' : `KAUFEN (${item.cost} CR)`}</button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="max-w-2xl mx-auto p-6">
+                                <header className="border-b-2 border-blue-600 pb-4 mb-6 flex justify-between items-end">
+                                    <div><h1 className="text-3xl text-blue-700 font-black tracking-tight">NeoHome Corp.</h1><p className="text-slate-500 text-sm mt-1">Ihr Partner für urbanes Wohnen und Smart-KI.</p></div>
+                                    <div className="text-right text-xs">Willkommen,<br/><span className="font-bold">{playerState.profile.name} (Sektor 4)</span></div>
+                                </header>
+                                <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-8 shadow-sm">
+                                    <h2 className="font-bold text-blue-800 mb-4 flex items-center gap-2"><UserIcon className="w-5 h-5"/> Mieter-Portal</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="bg-white p-4 border border-slate-200 rounded shadow-sm flex flex-col justify-between">
+                                            <div><h3 className="font-bold text-slate-700 text-sm">Monatsmiete</h3><p className="text-xs text-slate-500 mt-1 mb-3">Ausstehende Zahlungen verhindern Upgrades.</p></div>
+                                            {playerState.tenant?.rentPaid ? <div className="text-green-600 font-bold text-sm text-center py-2 bg-green-50 rounded">BEZAHLT</div> : <button onClick={payRent} disabled={playerState.credits < 500} className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-sm disabled:opacity-50">ZAHLEN (500 CR)</button>}
+                                        </div>
+                                        <div className="bg-white p-4 border border-slate-200 rounded shadow-sm flex flex-col justify-between">
+                                            <div><h3 className="font-bold text-slate-700 text-sm">KI-Lizenz: E.V.A. Premium</h3><p className="text-xs text-slate-500 mt-1 mb-3">Aktiviert das Empathie-Paket.</p></div>
+                                            {playerState.tenant?.evaPremium ? <div className="text-pink-500 font-bold text-sm text-center py-2 bg-pink-50 rounded border border-pink-100">AKTIV & GLÜCKLICH</div> : <button onClick={upgradeEva} disabled={!playerState.tenant?.rentPaid || playerState.credits < 1500} className="w-full py-2 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded text-sm disabled:opacity-50">LIZENZ KAUFEN (1500 CR)</button>}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-300 pb-2"><ShoppingCartIcon className="w-5 h-5"/> NeoHome Einrichtungshaus</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {FURNITURE_ITEMS.map(item => {
+                                            const isBought = playerState.furniture?.includes(item.id);
+                                            return (
+                                                <div key={item.id} className={`p-4 bg-white border rounded shadow-sm flex flex-col justify-between ${isBought ? 'border-green-300 opacity-70' : 'border-slate-200'}`}>
+                                                    <div><h3 className="font-bold text-slate-800 text-sm">{item.name}</h3><p className="text-xs text-slate-600 mt-1 mb-2 h-8">{item.desc}</p></div>
+                                                    <button onClick={() => buyFurniture(item)} disabled={isBought || playerState.credits < item.cost} className={`w-full py-1.5 text-xs font-bold rounded ${isBought ? 'bg-green-100 text-green-700 border border-green-200' : playerState.credits >= item.cost ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'}`}>{isBought ? 'GELIEFERT' : `BESTELLEN (${item.cost} CR)`}</button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {!isLoading && currentSiteId === 'blackmarket' && popups.map(p => (
+                            <div key={p.id} className="absolute bg-yellow-400 text-black border-2 border-red-600 shadow-[10px_10px_0_rgba(0,0,0,0.5)] z-50 animate-fade-in w-64" style={{ top: `${p.y}%`, left: `${p.x}%` }}>
+                                <div className="bg-red-600 text-white flex justify-between items-center px-1 font-bold text-xs"><div className="flex items-center gap-1"><AlertTriangleIcon className="w-3 h-3" /> AD</div><button onClick={() => closePopup(p.id)} className="hover:bg-white hover:text-red-600 px-1 font-sans cursor-pointer">X</button></div>
+                                <div className="p-4 text-center font-bold text-sm">{p.text}<button onClick={() => closePopup(p.id)} className="mt-4 px-4 py-1 bg-red-600 text-white text-xs hover:bg-red-700 mx-auto block cursor-pointer">KLICK HIER!</button></div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const ShadowBoardApp = ({ playerState, setPlayerState }) => {
+            const startGig = (gig) => {
+                if (playerState.gigs?.active) return;
+                setPlayerState(prev => ({
+                    ...prev,
+                    gigs: { 
+                        ...prev.gigs, 
+                        active: { id: gig.id, progress: 0, duration: gig.duration, gigDef: gig } 
+                    }
+                }));
+            };
+
+            const activeGig = playerState.gigs?.active;
+            const activeGigDef = activeGig?.gigDef;
+            const availableGigs = playerState.gigs?.available || [];
+
+            return (
+                <div className="flex flex-col h-full font-mono text-slate-300 bg-slate-950">
+                    <div className="p-3 border-b border-red-900/50 bg-red-950/20 text-red-500 text-sm font-bold flex justify-between shadow-sm">
+                        <span className="flex items-center gap-2"><BriefcaseIcon className="w-5 h-5"/> SHADOW_BOARD // GIGS</span>
+                        <span>COMPLETED: <span className="text-white">{playerState.gigs?.completed || 0}</span></span>
+                    </div>
+                    
+                    {activeGig && activeGigDef && (
+                        <div className="p-4 bg-red-950/30 border-b border-red-900 shadow-md">
+                            <div className="flex justify-between text-xs mb-2">
+                                <span className="text-red-400 font-bold animate-pulse">IN PROGRESS: {activeGigDef.title}</span>
+                                <span className="text-slate-400">{Math.floor((activeGig.progress / activeGig.duration) * 100)}%</span>
+                            </div>
+                            <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden shadow-inner">
+                                <div className="h-full bg-red-500 transition-all duration-1000 ease-linear shadow-[0_0_10px_rgba(239,68,68,0.8)]" style={{ width: `${(activeGig.progress / activeGig.duration) * 100}%` }}></div>
+                            </div>
+                            <div className="flex justify-between mt-2">
+                                <div className="text-[10px] text-slate-500">Mission läuft im Hintergrund... {activeGig.duration - activeGig.progress}s verbleibend</div>
+                                <div className="text-[10px] font-bold" style={{ color: activeGigDef.risk > 0.4 ? '#ef4444' : activeGigDef.risk > 0.2 ? '#eab308' : '#22c55e' }}>
+                                    RISIKO: {(activeGigDef.risk * 100).toFixed(0)}%
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-black">
+                        <div className="text-xs text-slate-500 mb-4 italic flex justify-between items-center">
+                            <span>Verfügbare Aufträge im Netzwerk</span>
+                            <span className="opacity-50">Auto-Refresh aktiv</span>
+                        </div>
+                        
+                        {availableGigs.length === 0 && (
+                            <div className="text-center text-slate-600 mt-10">Suche nach neuen Jobs im DarkNet...</div>
+                        )}
+
+                        {availableGigs.map(gig => {
+                            const riskColor = gig.risk > 0.4 ? 'text-red-500' : gig.risk > 0.2 ? 'text-yellow-500' : 'text-green-500';
+                            const isCryptoReward = gig.rewardType !== 'CR';
+                            const cryptoData = isCryptoReward ? CRYPTO_TYPES[gig.rewardType] : null;
+
+                            return (
+                                <div key={gig.id} className="p-4 border border-slate-800 bg-slate-900/50 rounded flex flex-col gap-2 relative hover:border-slate-600 transition-colors">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="text-red-400 font-bold">{gig.title}</h3>
+                                            <span className="text-[10px] bg-slate-800 px-1 rounded text-slate-400 mt-1 inline-block">Client: {gig.client}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            {isCryptoReward ? (
+                                                <div className={`font-bold text-sm flex items-center gap-1 justify-end ${cryptoData.color}`}>
+                                                    +{gig.rewardAmount} <DatabaseIcon className="w-3 h-3" /> {gig.rewardType}
+                                                </div>
+                                            ) : (
+                                                <div className="text-cyan-400 font-bold text-sm">+{gig.rewardAmount} CR</div>
+                                            )}
+                                            <div className="text-[10px] text-slate-500 mt-1">Dauer: {gig.duration}s</div>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-slate-400 mt-2">{gig.desc}</p>
+                                    
+                                    <div className="flex justify-between items-end mt-4">
+                                        <div className={`text-[10px] font-bold ${riskColor}`}>
+                                            GEFAHR GEFASST ZU WERDEN: {(gig.risk * 100).toFixed(0)}%
+                                        </div>
+                                        <button 
+                                            onClick={() => startGig(gig)}
+                                            disabled={activeGig != null}
+                                            className={`py-1.5 px-4 text-xs font-bold tracking-widest rounded transition-colors ${activeGig ? 'bg-slate-900 text-slate-700 cursor-not-allowed' : 'bg-red-900/20 hover:bg-red-900 border border-red-900 text-red-400 hover:text-white cursor-pointer'}`}
+                                        >
+                                            {activeGig?.gigDef?.id === gig.id ? 'AKTIV' : activeGig ? 'GESPERRT' : 'ANNEHMEN'}
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
+        const PoliceApp = ({ playerState }) => {
+            const records = playerState.police?.records || [];
+            const totalFines = playerState.police?.totalFines || 0;
+
+            return (
+                <div className="flex flex-col h-full font-mono bg-blue-950 text-blue-100">
+                    <div className="p-3 bg-blue-900 border-b-2 border-red-500 flex justify-between items-center shrink-0">
+                        <div className="flex items-center gap-2 font-bold tracking-widest text-red-100">
+                            <ShieldIcon className="w-5 h-5 text-red-500" />
+                            NCPD_ZENTRALREGISTER
+                        </div>
+                        <div className="animate-pulse w-2 h-2 rounded-full bg-red-500"></div>
+                    </div>
+
+                    <div className="flex-1 p-4 overflow-y-auto custom-scrollbar flex flex-col gap-4">
+                        <div className="flex gap-4 p-4 border border-blue-800 bg-blue-900/50 rounded">
+                            <div className="w-24 h-24 bg-blue-950 border border-blue-700 flex flex-col items-center justify-center text-blue-800 relative overflow-hidden">
+                                <UserIcon className="w-16 h-16 opacity-50" />
+                                <div className="absolute inset-x-0 bottom-2 text-center text-[8px] bg-black/50 text-white py-0.5">SUBJEKT 894-B</div>
+                            </div>
+                            <div className="flex-1 text-xs space-y-1">
+                                <div className="text-blue-400 font-bold border-b border-blue-800 pb-1 mb-2">VERDÄCHTIGEN-PROFIL</div>
+                                <div className="flex justify-between"><span className="text-blue-500">NAME:</span> <span className="text-white">{playerState.profile.name}</span></div>
+                                <div className="flex justify-between"><span className="text-blue-500">STATUS:</span> <span className="text-red-400">BEKANNT BEI BEHÖRDEN</span></div>
+                                <div className="flex justify-between"><span className="text-blue-500">GEZAHLTE STRAFEN:</span> <span className="text-white">{totalFines.toFixed(2)} CR</span></div>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex flex-col">
+                            <h3 className="text-blue-400 font-bold mb-2 text-sm">VORSTRAFENREGISTER</h3>
+                            {records.length === 0 ? (
+                                <div className="flex-1 flex items-center justify-center border border-dashed border-blue-800 rounded bg-blue-900/20 text-blue-500 italic text-xs">
+                                    Keine kriminellen Aktivitäten nachgewiesen. (Noch nicht.)
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {records.map(record => (
+                                        <div key={record.id} className="p-2 border-l-2 border-red-500 bg-blue-900/30 text-xs">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <span className="font-bold text-red-400">Tatheberführung: {record.crime}</span>
+                                                <span className="text-[10px] text-blue-500">{record.date}</span>
+                                            </div>
+                                            <div className="text-slate-300">
+                                                Konsequenz: Vollstreckung durch System-Routinen.
+                                                <br/>
+                                                <span className="text-red-400 font-bold">STRAFE EINGEZOGEN: {record.fine.toFixed(2)} CR</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SmartCamApp = ({ playerState }) => {
+            const f = playerState.furniture || [];
+            return (
+                <div className="flex flex-col h-full font-mono bg-black">
+                    <div className="flex items-center justify-between p-2 border-b border-red-900/50 bg-red-950/20 text-red-500 text-xs font-bold shrink-0">
+                        <span className="flex items-center gap-2"><CameraIcon className="w-4 h-4 animate-pulse" /> REC // SMARTCAM FEED</span>
+                        <span className="text-[10px] opacity-70">LOC: SEKTOR 4 / NATHAN'S APT</span>
+                    </div>
+                    
+                    <div className="flex-1 rounded-b relative overflow-hidden flex flex-col justify-end bg-slate-950">
+                        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(34, 211, 238, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 211, 238, 0.5) 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
+                        
+                        <div className="w-full h-32 bg-slate-900 border-t border-slate-700 relative z-10" style={{ transform: 'perspective(300px) rotateX(25deg)', transformOrigin: 'bottom' }}>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        </div>
+
+                        <div className="absolute bottom-16 left-0 right-0 h-40 z-20 flex items-end justify-around px-8 pb-4">
+                            <div className="relative w-32 h-full flex items-end justify-center">
+                                {f.includes('f_desk') && (
+                                    <div className="absolute bottom-0 w-28 h-20 border-t-4 border-l-4 border-r-4 border-slate-600 flex justify-center z-20">
+                                        <div className="w-12 h-8 bg-cyan-950 border border-cyan-500 shadow-[0_0_15px_rgba(34,211,238,0.3)] -mt-6 flex items-center justify-center text-[6px] text-cyan-400">TERMINAL OS</div>
+                                    </div>
+                                )}
+                                {f.includes('f_chair') && (
+                                    <div className="absolute bottom-0 left-16 w-10 h-16 bg-slate-800 border-l border-t border-slate-600 rounded-tl-lg z-30 drop-shadow-xl"></div>
+                                )}
+                            </div>
+
+                            <div className="relative w-40 h-full flex items-end justify-center">
+                                {f.includes('f_bed') ? (
+                                    <div className="absolute bottom-0 w-36 h-24 bg-slate-900 border-2 border-pink-500 rounded-t-3xl shadow-[0_0_20px_rgba(236,72,153,0.4)] flex items-center justify-center overflow-hidden">
+                                        <div className="absolute inset-0 bg-pink-500/10 animate-pulse"></div>
+                                        <span className="text-pink-400 text-[8px] tracking-widest relative z-10 bg-black/50 px-2 py-0.5 rounded">SLEEP_POD</span>
+                                    </div>
+                                ) : f.includes('f_matratze') ? (
+                                    <div className="absolute bottom-0 w-32 h-6 bg-slate-700 border-t border-slate-500 rounded-sm"></div>
+                                ) : (
+                                    <div className="absolute bottom-0 text-[10px] text-slate-600 italic">Kalter Polymer-Boden</div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <div className="absolute top-4 right-4 flex items-center gap-2 z-30 bg-black/50 px-2 py-1 rounded">
+                            <span className="text-[8px] font-mono text-slate-500">E.V.A. NODE</span>
+                            <div className="w-4 h-4 bg-slate-900 border border-slate-700 rounded-full flex items-center justify-center">
+                                <div className={`w-1.5 h-1.5 rounded-full ${playerState.tenant?.evaPremium ? 'bg-pink-500 shadow-[0_0_10px_rgba(236,72,153,1)] animate-pulse' : 'bg-red-500'}`}></div>
+                            </div>
+                        </div>
+
+                        <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.2)_2px,rgba(0,0,0,0.2)_4px)] z-40 pointer-events-none"></div>
+                        <div className="absolute top-4 left-4 text-red-500 font-mono text-[10px] z-50 opacity-50">CAM_01_ONLINE</div>
+                    </div>
+                </div>
+            )
+        };
+
+        const APPS = {
+            story: { id: 'story', name: 'E.V.A._Logs', icon: FileTextIcon, color: 'text-pink-400', borderColor: 'border-pink-500', component: StoryApp, title: "E.V.A._SYSTEM_LOGS.txt", defaultPos: { x: 40, y: 40 }, defaultSize: { width: 500, height: 400 }, showOnDesktop: true, showInStart: false },
+            miner: { id: 'miner', name: 'NetRunner', icon: DatabaseIcon, color: 'text-green-400', borderColor: 'border-green-500', component: CryptoApp, title: "NETRUNNER_CRYPTO_V2.1", defaultPos: { x: 60, y: 20 }, defaultSize: { width: 650, height: 500 }, showOnDesktop: true, showInStart: false },
+            shadowboard: { id: 'shadowboard', name: 'ShadowBoard', icon: BriefcaseIcon, color: 'text-red-400', borderColor: 'border-red-500', component: ShadowBoardApp, title: "SHADOW_BOARD_V2.0", defaultPos: { x: 180, y: 80 }, defaultSize: { width: 500, height: 550 }, showOnDesktop: true, showInStart: true },
+            browser: { id: 'browser', name: 'Nexus Browser', icon: GlobeIcon, color: 'text-blue-400', borderColor: 'border-blue-500', component: BrowserApp, title: "NEXUS_BROWSER_v1.0", defaultPos: { x: 100, y: 60 }, defaultSize: { width: 650, height: 550 }, showOnDesktop: true, showInStart: true },
+            smartcam: { id: 'smartcam', name: 'SmartCam', icon: CameraIcon, color: 'text-teal-400', borderColor: 'border-teal-500', component: SmartCamApp, title: "SECURE_CAM_VIEWER", defaultPos: { x: 220, y: 120 }, defaultSize: { width: 500, height: 400 }, showOnDesktop: true, showInStart: true },
+            mail: { id: 'mail', name: 'SecureMail', icon: MailIcon, color: 'text-yellow-400', borderColor: 'border-yellow-500', component: MailApp, title: "SECURE_MAIL_CLIENT_v2.2", defaultPos: { x: 140, y: 80 }, defaultSize: { width: 650, height: 450 }, showOnDesktop: true, showInStart: true },
+            ncpd: { id: 'ncpd', name: 'Polizeiakte', icon: ShieldIcon, color: 'text-blue-500', borderColor: 'border-blue-600', component: PoliceApp, title: "NCPD_DB_ACCESS_UNAUTHORIZED", defaultPos: { x: 260, y: 140 }, defaultSize: { width: 450, height: 500 }, showOnDesktop: true, showInStart: true },
+            settings: { id: 'settings', name: 'System', icon: SettingsIcon, color: 'text-cyan-400', borderColor: 'border-cyan-500', component: SettingsApp, title: "TERMINAL_OS_CONFIG", defaultPos: { x: 150, y: 100 }, defaultSize: { width: 450, height: 450 }, showOnDesktop: false, showInStart: true },
+            portfolio: { id: 'portfolio', name: 'Portfolio', icon: WalletIcon, color: 'text-purple-400', borderColor: 'border-purple-500', component: PortfolioApp, title: "USER_PORTFOLIO.exe", defaultPos: { x: 100, y: 50 }, defaultSize: { width: 450, height: 550 }, showOnDesktop: false, showInStart: false } 
+        };
+
+        const generateRandomGig = () => {
+            const clients = ['Neon-Syndikat', 'Fixer V.', 'Rogue AI', 'Krypto-Kult', 'Unknown_Proxy'];
+            const tasks = ['Server Hack', 'Daten-Schmuggel', 'DDoS Attacke', 'Proxy-Umleitung', 'Verschlüsselung knacken', 'Bandbreiten-Diebstahl'];
+            const client = clients[Math.floor(Math.random() * clients.length)];
+            const task = tasks[Math.floor(Math.random() * tasks.length)];
+            const duration = Math.floor(Math.random() * 160) + 20; 
+            const risk = (Math.random() * 0.55) + 0.05; 
+            const isCrypto = Math.random() > 0.7;
+
+            let rewardType = 'CR';
+            let rewardAmount = Math.floor((duration * 1.5) * (1 + (risk * 3))); 
+
+            if (isCrypto) {
+                const roll = Math.random();
+                if (roll > 0.8) { rewardType = 'VDT'; rewardAmount = +(rewardAmount / 15 / 4).toFixed(2); }
+                else if (roll > 0.4) { rewardType = 'BYC'; rewardAmount = +(rewardAmount / 2.5 / 2).toFixed(2); }
+                else { rewardType = 'NNC'; rewardAmount = +(rewardAmount / 0.5 / 1.5).toFixed(2); }
+            }
+
+            return {
+                id: 'gig_' + Date.now() + Math.random(),
+                title: task, client,
+                desc: `Ziel: Unbekannt. Auftraggeber: ${client}. Verschleiere deine Spuren gut.`,
+                duration, risk, rewardType,
+                rewardAmount: Math.max(0.01, rewardAmount)
+            };
+        };
+
+        const DEFAULT_PLAYER_STATE = {
+            credits: 0.0,
+            gpuHeat: 0, 
+            inventory: { NNC: 0.0, BYC: 0.0, VDT: 0.0 },
+            profile: { name: 'Nathan', role: 'Gast-Zugang', level: 1, totalHacks: 0 },
+            upgrades: { adBlocker: false, connectionSpeed: 1, cpuLevel: 1, ramLevel: 1, gpuLevel: 0, coolingLevel: 1 },
+            hardware: { cpu: 'Basic Cyber-Core v1', gpu: 'Keine (Onboard Graphics)', ram: '4GB DDR-Synth', network: '56k Proxy-Link', cooling: 'Passiv (Defekt)' },
+            market: {
+                NNC: { price: 0.5, history: Array(40).fill(0.5), trend: 0 },
+                BYC: { price: 2.5, history: Array(40).fill(2.5), trend: 0 },
+                VDT: { price: 15.0, history: Array(40).fill(15.0), trend: 0 }
+            },
+            marketNews: [],
+            mails: [
+                { id: 1, sender: "E.V.A.", subject: "Wohnungs-Status: Kritisch", body: "Guten Tag Nathan.\n\nIch möchte Sie freundlich, aber bestimmt darauf hinweisen, dass sämtliche Möbelstücke letzte Nacht während Ihres Schlafes konfisziert wurden. \n\nIhre aktuelle Schlafgelegenheit: Synthetischer Polymer-Boden. \nGeschätzter Erholungsfaktor: 0%.\n\nDa Ihr Premium-Empathie-Paket abgelaufen ist, erspare ich mir aufbauende Worte.\nEmpfehlung: Nutzen Sie Ihr Terminal OS, um umgehend erste Credits zu generieren. Andernfalls wird der Vermieter-Konzern voraussichtlich in 48 Stunden auch Ihre Lebenserhaltung wegen Zahlungsverzug deaktivieren.\n\nGezeichnet,\nE.V.A. (Ihre Wohnungs-KI)", date: "02:04 AM", read: false },
+                { id: 2, sender: "Unknown_Proxy", subject: "RE: Gigs", body: "Hab gehört, du bist wieder online, Nathan. \n\nDein Apartment wurde komplett entkernt, was? Pech für dich. Wenn du ein paar schnelle Credits brauchst, um nicht zu verhungern, nutz die NetRunner App auf deinem Desktop. \n\nIst simpel: Du entschlüsselst Datenpakete (Kryptos) und vertickst sie auf dem Market Exchange. Wenn du Hardware-Upgrades brauchst, um den Prozess zu beschleunigen, lad den Nexus Browser runter und geh auf den BlackMarket.\n\nLass dich nicht von den Syndikaten erwischen.\n\n- V.", date: "02:45 AM", read: false }
+            ],
+            tenant: { rentPaid: false, evaPremium: false },
+            furniture: [],
+            gigs: { active: null, completed: 0, available: [] },
+            police: { records: [], totalFines: 0 } 
+        };
+
+        const MainGame = ({ setGameState }) => {
+            const [openApps, setOpenApps] = useState([]);
+            const [activeApp, setActiveApp] = useState(null);
+            const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
+            const [notifications, setNotifications] = useState([]);
+
+            const [playerState, setPlayerState] = useState(() => {
+                const savedState = localStorage.getItem('cyberOS_save');
+                if (savedState) {
+                    try {
+                        const parsed = JSON.parse(savedState);
+                        const loadedGigs = parsed.gigs || { active: null, completed: 0, available: [] };
+                        if (!loadedGigs.available) loadedGigs.available = [];
+                        
+                        return {
+                            ...DEFAULT_PLAYER_STATE,
+                            ...parsed,
+                            gpuHeat: parsed.gpuHeat || 0,
+                            upgrades: { ...DEFAULT_PLAYER_STATE.upgrades, ...(parsed.upgrades || {}) },
+                            hardware: { ...DEFAULT_PLAYER_STATE.hardware, ...(parsed.hardware || {}) },
+                            inventory: { ...DEFAULT_PLAYER_STATE.inventory, ...(parsed.inventory || {}) },
+                            profile: { ...DEFAULT_PLAYER_STATE.profile, ...(parsed.profile || {}) },
+                            market: parsed.market || DEFAULT_PLAYER_STATE.market, 
+                            marketNews: parsed.marketNews || [],
+                            mails: parsed.mails && parsed.mails.length > 0 ? parsed.mails : DEFAULT_PLAYER_STATE.mails,
+                            tenant: { ...DEFAULT_PLAYER_STATE.tenant, ...(parsed.tenant || {}) },
+                            furniture: parsed.furniture || [],
+                            gigs: loadedGigs,
+                            police: parsed.police || { records: [], totalFines: 0 }
+                        };
+                    } catch (e) {
+                        return DEFAULT_PLAYER_STATE;
+                    }
+                }
+                return DEFAULT_PLAYER_STATE;
+            });
+
+            useEffect(() => { localStorage.setItem('cyberOS_save', JSON.stringify(playerState)); }, [playerState]);
+
+            const addNotification = (title, message, type = 'info') => {
+                const id = Date.now() + Math.random();
+                setNotifications(prev => [...prev, { id, title, message, type }]);
+                setTimeout(() => { setNotifications(prev => prev.filter(n => n.id !== id)); }, 5000);
+            };
+
+            useEffect(() => {
+                const marketTick = setInterval(() => {
+                    setPlayerState(prev => {
+                        const currentMarket = prev.market || DEFAULT_PLAYER_STATE.market;
+                        const newMarket = {};
+                        let newNews = prev.marketNews ? [...prev.marketNews] : [];
+                        let newsGenerated = false;
+
+                        Object.keys(CRYPTO_TYPES).forEach(coin => {
+                            const basePrice = CRYPTO_TYPES[coin].value;
+                            const currentData = currentMarket[coin] || { price: basePrice, history: Array(40).fill(basePrice), trend: 0 };
+                            let changePct = (Math.random() - 0.5) * 0.06;
+                            
+                            if (Math.random() < 0.04 && !newsGenerated) {
+                                newsGenerated = true;
+                                const isGood = Math.random() > 0.5;
+                                changePct = (Math.random() * 0.3 + 0.1) * (isGood ? 1 : -1); 
+                                const newsTemplatesGood = [ `Megacorp adaptiert ${coin} für interne Transaktionen.`, `Unbekannter Wal kauft Millionen von ${coin}.`, `Neue Verschlüsselung treibt das Vertrauen in ${coin}.`, `${coin} offiziell als Zahlungsmittel akzeptiert.` ];
+                                const newsTemplatesBad = [ `51%-Attacke auf ${coin} Netzwerk vermutet!`, `Syndikat verbietet ${coin} Handel. Kurs bricht ein.`, `Großer Exchange gehackt, ${coin} gestohlen.`, `${coin} Hauptentwickler taucht unter. Scam Verdacht!` ];
+                                const msg = isGood ? newsTemplatesGood[Math.floor(Math.random() * newsTemplatesGood.length)] : newsTemplatesBad[Math.floor(Math.random() * newsTemplatesBad.length)];
+                                newNews.unshift({ time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}), msg, type: isGood ? 'good' : 'bad', coin });
+                            }
+                            if (currentData.price > basePrice * 5) changePct -= 0.05;
+                            if (currentData.price < basePrice * 0.2) changePct += 0.05;
+
+                            let newPrice = Math.max(0.01, currentData.price * (1 + changePct));
+                            newMarket[coin] = { price: newPrice, history: [...currentData.history, newPrice].slice(-40), trend: newPrice - currentData.price };
+                        });
+                        return { ...prev, market: newMarket, marketNews: newNews.slice(0, 15) };
+                    });
+                }, 3000); 
+
+                const gigTick = setInterval(() => {
+                    setPlayerState(prev => {
+                        const currentGigs = prev.gigs || { available: [], active: null, completed: 0 };
+                        let newAvailable = [...currentGigs.available];
+
+                        if (newAvailable.length < 4 && Math.random() < 0.2) newAvailable.push(generateRandomGig());
+                        if (newAvailable.length > 0 && Math.random() < 0.05) newAvailable.shift();
+
+                        if (!currentGigs.active) return { ...prev, gigs: { ...currentGigs, available: newAvailable } };
+
+                        const active = currentGigs.active;
+                        const newProgress = active.progress + 1;
+                        
+                        if (newProgress >= active.duration) {
+                            const gigDef = active.gigDef;
+                            if (Math.random() < gigDef.risk) {
+                                const fine = Math.floor((prev.credits * 0.15) + 50); 
+                                const actualFine = Math.min(prev.credits, fine); 
+                                window.dispatchEvent(new CustomEvent('gig-caught', { detail: { gigDef, actualFine } }));
+                                return {
+                                    ...prev,
+                                    credits: prev.credits - actualFine,
+                                    gigs: { ...currentGigs, active: null, available: newAvailable.filter(g => g.id !== gigDef.id) },
+                                    police: {
+                                        ...prev.police,
+                                        totalFines: (prev.police?.totalFines || 0) + actualFine,
+                                        records: [{ id: Date.now(), date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), crime: gigDef.title, fine: actualFine }, ...(prev.police?.records || [])]
+                                    }
+                                };
+                            } else {
+                                window.dispatchEvent(new CustomEvent('gig-complete', { detail: gigDef }));
+                                let newCredits = prev.credits;
+                                let newInv = { ...prev.inventory };
+                                if (gigDef.rewardType === 'CR') newCredits += gigDef.rewardAmount;
+                                else newInv[gigDef.rewardType] += gigDef.rewardAmount;
+
+                                return { ...prev, credits: newCredits, inventory: newInv, gigs: { ...currentGigs, active: null, completed: currentGigs.completed + 1, available: newAvailable.filter(g => g.id !== gigDef.id) } };
+                            }
+                        }
+                        return { ...prev, gigs: { ...currentGigs, available: newAvailable, active: { ...active, progress: newProgress } } };
+                    });
+                }, 1000);
+
+                return () => { clearInterval(marketTick); clearInterval(gigTick); };
+            }, []);
+
+            useEffect(() => {
+                const handleGigComplete = (e) => {
+                    const gig = e.detail;
+                    const rewardStr = gig.rewardType === 'CR' ? `${gig.rewardAmount} CR` : `${gig.rewardAmount} ${gig.rewardType}`;
+                    addNotification("GIG ABGESCHLOSSEN", `Auftrag erfüllt! +${rewardStr} wurden transferiert.`, "success");
+                };
+                const handleGigCaught = (e) => {
+                    const { gigDef, actualFine } = e.detail;
+                    addNotification("NCPD ALARM", `Du wurdest bei '${gigDef.title}' erwischt! Strafe: ${actualFine.toFixed(2)} CR.`, "error");
+                };
+                window.addEventListener('gig-complete', handleGigComplete);
+                window.addEventListener('gig-caught', handleGigCaught);
+                return () => { window.removeEventListener('gig-complete', handleGigComplete); window.removeEventListener('gig-caught', handleGigCaught); }
+            }, []);
+
+            const handleOpenApp = (appId) => {
+                if (!openApps.includes(appId)) setOpenApps([...openApps, appId]);
+                setActiveApp(appId); setIsStartMenuOpen(false);
+            };
+
+            const handleCloseApp = (appId) => {
+                const newOpenApps = openApps.filter(id => id !== appId);
+                setOpenApps(newOpenApps);
+                if (activeApp === appId) setActiveApp(newOpenApps.length > 0 ? newOpenApps[newOpenApps.length - 1] : null);
+            };
+
+            const memoryUsage = Math.min(99.9, 12.4 + (openApps.length * 15.2)).toFixed(1);
+            const hasGpu = playerState.upgrades.gpuLevel > 0;
+            const gpuHeat = playerState.gpuHeat || 0;
+            const gpuHeatText = hasGpu ? `${Math.floor(gpuHeat)}%` : 'OFFLINE';
+            const gpuHeatColor = !hasGpu ? 'text-slate-600' : (gpuHeat >= 100 ? 'text-red-500 animate-pulse' : 'text-purple-400');
+
+            return (
+                <div className="flex flex-col h-full w-full bg-slate-950 text-white font-sans relative overflow-hidden" onClick={() => isStartMenuOpen && setIsStartMenuOpen(false)}>
+                    <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(34, 211, 238, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 211, 238, 0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+                    
+                    <header className="flex justify-between items-center p-2 border-b border-cyan-900/50 z-10 bg-black/80 backdrop-blur-md relative pointer-events-none">
+                        <h1 className={`text-lg font-bold tracking-wider uppercase font-mono ${THEME.neonBlue}`}>Cyber<span className="text-white">-OS</span></h1>
+                        <div className="flex space-x-4 md:space-x-6 font-mono text-xs items-center">
+                            <div className="flex flex-col items-end px-2 md:px-4 border-r border-slate-800"><span className="text-slate-500 text-[10px]">CREDITS</span><span className="text-cyan-400 font-bold">{playerState.credits.toFixed(2)} CR</span></div>
+                            <div className="flex flex-col items-end"><span className="text-slate-500 text-[10px]">GPU_TEMP</span><span className={gpuHeatColor}>{gpuHeatText}</span></div>
+                            <div className="flex flex-col items-end"><span className="text-slate-500 text-[10px]">MEM_USAGE</span><span className="text-pink-400 transition-all">{memoryUsage}%</span></div>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 relative p-6 z-10 flex flex-col gap-6 items-start">
+                        <div className="flex flex-wrap gap-6 relative z-10">
+                            {Object.values(APPS).filter(app => app.showOnDesktop).map((app) => (
+                                <button key={app.id} onClick={(e) => { e.stopPropagation(); handleOpenApp(app.id); }} className="group flex flex-col items-center justify-center w-24 gap-2 cursor-pointer hover:bg-slate-800/50 p-2 rounded transition-colors">
+                                    <div className={`w-14 h-14 bg-slate-900 border ${app.borderColor.replace('border-', 'border-').concat('/50')} rounded flex items-center justify-center group-hover:${app.borderColor} transition-all`}><app.icon className={`w-7 h-7 ${app.color}`} /></div>
+                                    <span className="text-xs font-mono text-slate-300 group-hover:text-white drop-shadow-md bg-black/50 px-1 rounded">{app.name}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        {openApps.map((appId) => {
+                            const app = APPS[appId]; const AppContent = app.component;
+                            return (
+                                <WindowComponent key={appId} title={app.title} onClose={() => handleCloseApp(appId)} isActive={activeApp === appId} onClick={(e) => { e.stopPropagation(); setActiveApp(appId); }} themeColor={app.borderColor} initialPos={app.defaultPos} initialSize={app.defaultSize}>
+                                    <AppContent playerState={playerState} setPlayerState={setPlayerState} addNotification={addNotification} />
+                                </WindowComponent>
+                            );
+                        })}
+                    </main>
+
+                    <div className="fixed top-16 right-4 z-[200] flex flex-col gap-3 pointer-events-none w-72">
+                        {notifications.map(note => (
+                            <div key={note.id} className="bg-slate-900/95 border border-slate-700 shadow-[0_0_15px_rgba(0,0,0,0.8)] backdrop-blur-md rounded p-3 animate-slide-in-right flex gap-3 items-start pointer-events-auto">
+                                <div className="mt-0.5">
+                                    {note.type === 'error' && <AlertTriangleIcon className="w-5 h-5 text-red-500" />}
+                                    {note.type === 'success' && <CheckCircleIcon className="w-5 h-5 text-green-500" />}
+                                    {note.type === 'info' && <BellIcon className="w-5 h-5 text-cyan-400" />}
+                                </div>
+                                <div className="flex-1"><h4 className={`text-xs font-bold font-mono tracking-wider ${note.type === 'error' ? 'text-red-500' : note.type === 'success' ? 'text-green-500' : 'text-cyan-400'}`}>{note.title}</h4><p className="text-[11px] text-slate-300 font-sans leading-tight mt-1">{note.message}</p></div>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    {isStartMenuOpen && (
+                        <div className="absolute bottom-12 left-2 w-64 bg-slate-950/95 border border-cyan-500/50 shadow-[0_0_20px_rgba(34,211,238,0.2)] backdrop-blur-xl z-[100] rounded-t-sm flex flex-col font-mono text-sm overflow-hidden animate-fade-in" onClick={(e) => e.stopPropagation()}>
+                            <div className="p-4 border-b border-slate-800 flex items-center gap-3 bg-black hover:bg-slate-900 transition-colors cursor-pointer group" onClick={() => handleOpenApp('portfolio')}>
+                                <div className="w-10 h-10 rounded-full bg-slate-900 border border-purple-500 flex items-center justify-center group-hover:shadow-[0_0_10px_rgba(168,85,247,0.5)] transition-shadow"><span className="text-purple-500 font-bold">N</span></div>
+                                <div><div className="text-white font-bold">{playerState.profile.name}</div><div className="text-[10px] text-slate-400 group-hover:text-purple-400 transition-colors">PORTFOLIO & PROFIL ansehen</div></div>
+                            </div>
+                            <div className="flex flex-col p-2 gap-1 border-b border-slate-800 py-3">
+                                <div className="text-[10px] text-slate-500 px-2 mb-1 tracking-widest">SYSTEM APPS</div>
+                                {Object.values(APPS).filter(app => app.showInStart).map(app => (
+                                    <button key={app.id} onClick={() => handleOpenApp(app.id)} className="flex items-center gap-3 p-2 hover:bg-slate-800 rounded text-slate-300 hover:text-white transition-colors cursor-pointer text-left"><app.icon className={`w-4 h-4 ${app.color}`} /> {app.name}</button>
+                                ))}
+                            </div>
+                            <div className="flex flex-col p-2 gap-1 bg-slate-950/80">
+                                <button onClick={() => setGameState(GAME_STATES.BOOTING)} className="flex items-center gap-3 p-2 hover:bg-slate-800 rounded text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer text-left"><RefreshIcon className="w-4 h-4" /> Neustart</button>
+                                <button onClick={() => setGameState(GAME_STATES.OFF)} className="flex items-center gap-3 p-2 hover:bg-slate-800 rounded text-slate-300 hover:text-red-500 transition-colors cursor-pointer text-left"><PowerIcon className="w-4 h-4" /> Herunterfahren</button>
+                            </div>
+                        </div>
+                    )}
+
+                    <footer className="h-10 w-full bg-black/95 border-t border-cyan-900 z-50 relative flex items-center px-2 gap-2 backdrop-blur-lg">
+                        <button onClick={(e) => { e.stopPropagation(); setIsStartMenuOpen(!isStartMenuOpen); }} className={`p-1.5 rounded cursor-pointer transition-colors ${isStartMenuOpen ? 'bg-cyan-900/50 text-cyan-400' : 'text-slate-400 hover:text-cyan-400 hover:bg-slate-800'}`}><HexagonIcon className="w-6 h-6" /></button>
+                        <div className="w-px h-6 bg-slate-800 mx-1"></div>
+                        <div className="flex-1 flex gap-1 overflow-x-auto custom-scrollbar">
+                            {openApps.map(appId => {
+                                const app = APPS[appId]; const isActive = activeApp === appId;
+                                return (
+                                    <button key={appId} onClick={(e) => { e.stopPropagation(); setActiveApp(appId); }} className={`flex items-center gap-2 px-3 h-8 min-w-[120px] max-w-[160px] rounded-sm border-b-2 transition-all cursor-pointer font-mono text-xs truncate ${isActive ? 'bg-slate-800 border-cyan-400 text-white' : 'bg-slate-900/50 border-transparent text-slate-400 hover:bg-slate-800'}`}>
+                                        <app.icon className={`w-4 h-4 flex-shrink-0 ${app.color}`} /><span className="truncate">{app.name}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <div className="flex flex-col items-end px-2 border-l border-slate-800"><div className="text-[10px] font-mono text-cyan-500/70">SYSTIME_OK</div><div className="text-[8px] font-mono text-slate-500">AUTOSAVE: ON</div></div>
+                    </footer>
+                </div>
+            );
+        };
+
+        function App() {
+            const [gameState, setGameState] = useState(GAME_STATES.OFF);
+
+            useEffect(() => {
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+                    .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+                    @keyframes slideInRight { 0% { transform: translateX(120%); opacity: 0; } 10% { transform: translateX(-5%); opacity: 1; } 15% { transform: translateX(0); opacity: 1; } 90% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(120%); opacity: 0; } }
+                    .animate-slide-in-right { animation: slideInRight 5s ease-in-out forwards; }
+                    @keyframes fogDrift1 { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 50% { transform: translate(-45%, -55%) scale(1.1); opacity: 0.8; } }
+                    .animate-fog-drift-1 { animation: fogDrift1 10s ease-in-out infinite; }
+                    @keyframes fogDrift2 { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 50% { transform: translate(-55%, -45%) scale(1.1); opacity: 0.8; } }
+                    .animate-fog-drift-2 { animation: fogDrift2 12s ease-in-out infinite; }
+                    @keyframes lightBeam1 { 0% { transform: translateX(-100vw) translateY(0) rotate(15deg); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateX(100vw) translateY(100px) rotate(15deg); opacity: 0; } }
+                    .animate-light-beam-1 { animation: lightBeam1 6s linear infinite; }
+                    @keyframes lightBeam2 { 0% { transform: translateX(100vw) translateY(0) rotate(-15deg); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateX(-100vw) translateY(-100px) rotate(-15deg); opacity: 0; } }
+                    .animate-light-beam-2 { animation: lightBeam2 8s linear infinite; animation-delay: 2s; }
+                    @keyframes particleFloat { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { opacity: 1; transform: translateY(-20px) scale(1); } 80% { opacity: 1; } 100% { transform: translateY(-100px) scale(0); opacity: 0; } }
+                    .animate-particle-float { animation: particleFloat linear infinite forwards; }
+                    @keyframes fogEngulfPink { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; filter: blur(100px); } 100% { transform: translate(-50%, -50%) scale(5); opacity: 1; filter: blur(30px); } }
+                    .animate-fog-engulf-pink { animation: fogEngulfPink 3.5s ease-in forwards; }
+                    @keyframes fogEngulfBlue { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; filter: blur(100px); } 100% { transform: translate(-50%, -50%) scale(5); opacity: 1; filter: blur(30px); } }
+                    .animate-fog-engulf-blue { animation: fogEngulfBlue 3.5s ease-in forwards; }
+                    @keyframes fogEngulfCenter { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0; filter: blur(50px); } 50% { opacity: 1; filter: blur(80px); } 100% { transform: translate(-50%, -50%) scale(15); opacity: 1; filter: blur(10px); } }
+                    .animate-fog-engulf-center { animation: fogEngulfCenter 3.5s ease-in forwards; }
+                    @keyframes systemFlash { 0%, 75% { opacity: 0; } 95% { opacity: 1; } 100% { opacity: 0; } }
+                    .animate-system-flash { animation: systemFlash 3.5s ease-in-out forwards; }
+                    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                    .custom-scrollbar::-webkit-scrollbar-track { background: #020617; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+                `;
+                document.head.appendChild(style);
+                return () => document.head.removeChild(style);
+            }, []);
+
+            return (
+                <div className="w-full h-screen bg-black overflow-hidden select-none">
+                    {gameState === GAME_STATES.OFF && <PowerScreen onPowerOn={() => setGameState(GAME_STATES.WAKING)} />}
+                    {gameState === GAME_STATES.WAKING && <StartupAnimationScreen onComplete={() => setGameState(GAME_STATES.BOOTING)} />}
+                    {gameState === GAME_STATES.BOOTING && <BootScreen onComplete={() => setGameState(GAME_STATES.RUNNING)} />}
+                    {gameState === GAME_STATES.RUNNING && <MainGame setGameState={setGameState} />}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
