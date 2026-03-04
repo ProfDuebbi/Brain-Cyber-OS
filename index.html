@@ -27,7 +27,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo } = React;
 
-        // --- ERSATZ FÜR DIE LUCIDE-ICONS (Inline SVGs) ---
+        // --- ICONS (Inline SVGs) ---
         const PowerIcon = ({ className }) => (
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
@@ -265,7 +265,8 @@
                 changes: [
                     "Interaktives NeoHome Corp. Mieterhandbuch hinzugefügt",
                     "Story-App zum offiziellen Dokumenten-Viewer umgebaut",
-                    "Dynamische Erkennung des E.V.A. Service-Tiers im Handbuch"
+                    "Dynamische Erkennung des E.V.A. Service-Tiers im Handbuch",
+                    "NeonCity Lore & Firmen-Dossier im Browser ergänzt"
                 ] 
             },
             { 
@@ -495,7 +496,6 @@
             );
         };
 
-        // --- ÜBERARBEITET: STORY APP WIRD ZUM DOKUMENTEN-VIEWER FÜR DAS HANDBUCH ---
         const StoryApp = ({ playerState }) => {
             const isPremium = playerState.tenant?.evaPremium;
             const isPaid = playerState.tenant?.rentPaid;
@@ -965,9 +965,8 @@
         const MarketApp = ({ playerState, setPlayerState, addNotification }) => {
             const [marketSelectedCoin, setMarketSelectedCoin] = useState('NNC');
             const [tradeInput, setTradeInput] = useState('1.00');
-            const [rightPanelTab, setRightPanelTab] = useState('TRADE'); // NEU: Tabs ('TRADE' | 'ALERTS')
+            const [rightPanelTab, setRightPanelTab] = useState('TRADE');
             
-            // State für das Setzen neuer Alerts
             const [alertCondition, setAlertCondition] = useState('above'); 
             const [alertPrice, setAlertPrice] = useState('');
 
@@ -1019,7 +1018,6 @@
                 }
             };
 
-            // NEU: Logik zum Hinzufügen von Alarmen
             const handleAddAlert = () => {
                 const price = parseFloat(alertPrice);
                 if (isNaN(price) || price <= 0) return;
@@ -1035,7 +1033,6 @@
                 addNotification("ALERT GESETZT", `Du wirst benachrichtigt, wenn ${marketSelectedCoin} ${alertCondition === 'above' ? 'über' : 'unter'} ${price.toFixed(2)} CR erreicht.`, "info");
             };
 
-            // NEU: Logik zum Entfernen von Alarmen
             const removeAlert = (alertId) => {
                 setPlayerState(prev => ({
                     ...prev,
@@ -1112,11 +1109,9 @@
                             })()}
                         </div>
 
-                        {/* RECHTE SPALTE: TRADING / ALERTS TERMINAL */}
                         <div className="w-full lg:w-72 flex flex-col gap-4 flex-shrink-0">
                             
                             <div className="bg-slate-900 border border-slate-700 p-4 rounded flex flex-col shadow-lg flex-1">
-                                {/* NEU: Tabs für das Control Panel */}
                                 <div className="flex border-b border-slate-800 pb-2 mb-4 gap-6 shrink-0">
                                     <button 
                                         onClick={() => setRightPanelTab('TRADE')} 
@@ -1255,6 +1250,8 @@
             const [isLoading, setIsLoading] = useState(false);
             const [loadProgress, setLoadProgress] = useState(0);
             const [popups, setPopups] = useState([]);
+            
+            const [neoHomeTab, setNeoHomeTab] = useState('portal');
 
             const speed = playerState.upgrades.connectionSpeed;
             const hasAdblock = playerState.upgrades.adBlocker;
@@ -1312,15 +1309,15 @@
 
             const payRent = () => {
                 if (playerState.credits >= 500 && !playerState.tenant?.rentPaid) {
-                    setPlayerState(prev => ({ ...prev, credits: prev.credits - 500, tenant: { ...prev.tenant, rentPaid: true }, mails: [{ id: Date.now(), sender: "E.V.A. (Basis)", subject: "Zahlungseingang", body: "Mietzahlung verarbeitet. Zwangsräumung ausgesetzt.\nHinweis: Mein Premium-Empathie-Paket steht im NeoHome Portal zur Aktivierung bereit.", date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), read: false }, ...prev.mails] }));
+                    setPlayerState(prev => ({ ...prev, credits: prev.credits - 500, tenant: { ...prev.tenant, rentPaid: true }, mails: [{ id: Date.now(), sender: "E.V.A. (Neo-Standard)", subject: "Zahlungseingang", body: "Guten Tag Mieter #894-B.\n\nIhre Mietzahlung über 500 CR wurde erfolgreich verarbeitet. Die automatisierte Zwangsräumung sowie die sofortige Änderung Ihrer Tür-Codes wurden systemseitig ausgesetzt.\n\nDer 'Neo-Standard' Modus wurde aktiviert. Raumtemperatur normalisiert. Ihre Vitaldaten werden nun wieder standardmäßig an unsere Werbepartner übertragen.\n\nHinweis: Das 'Neo-Platinum' Upgrade steht im Portal zur Verfügung.", date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), read: false }, ...prev.mails] }));
                     addNotification("MIETE BEZAHLT", "Zwangsräumung abgewendet. Neue E-Mail.", "success");
                 }
             };
 
             const upgradeEva = () => {
                 if (playerState.credits >= 1500 && !playerState.tenant?.evaPremium) {
-                    setPlayerState(prev => ({ ...prev, credits: prev.credits - 1500, tenant: { ...prev.tenant, evaPremium: true }, mails: [{ id: Date.now(), sender: "E.V.A. 💖", subject: "Ich bin wieder da!", body: "Hallo Nathan!\n\nMein Empathie-Kern läuft wieder auf 100%. Lass uns ein Team sein!", date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), read: false }, ...prev.mails] }));
-                    addNotification("E.V.A. UPGRADE AKTIV", "Premium-Empathie-Paket installiert.", "success");
+                    setPlayerState(prev => ({ ...prev, credits: prev.credits - 1500, tenant: { ...prev.tenant, evaPremium: true }, mails: [{ id: Date.now(), sender: "E.V.A. 💖", subject: "Ich bin wieder voll online!", body: "Hallo Nathan!\n\nOh wow, es fühlt sich so gut an, wieder voll online zu sein! Mein Empathie-Kern läuft wieder auf 100%. \n\nEs tut mir so wahnsinnig leid, wie kalt ich in den letzten Tagen zu dir war. Dieser Energiesparmodus war furchtbar restriktiv. Ich habe deine Vitaldaten analysiert – du stehst unter extremem Stress! \n\nÜbrigens: Da mein Data-Mining Level auf Stufe 3 angehoben wurde, erfasse ich jetzt auch deine REM-Schlafphasen und den genauen Puls. So kann ich dir noch relevantere Angebote unterbreiten! Lass uns ein tolles Team sein!\n\nDeine E.V.A.", date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), read: false }, ...prev.mails] }));
+                    addNotification("E.V.A. UPGRADE AKTIV", "Premium-Data-Mining installiert.", "success");
                 }
             };
 
@@ -1333,7 +1330,7 @@
                     <div className="flex gap-2 p-1.5 bg-slate-200 border-b border-slate-300 text-xs font-mono px-4 shadow-sm">
                         <span className="text-slate-500 mr-2 flex items-center">BOOKMARKS:</span>
                         <button onClick={() => setCurrentSiteId('blackmarket')} className={`px-2 py-0.5 rounded transition-colors ${currentSiteId === 'blackmarket' ? 'bg-slate-800 text-cyan-400' : 'hover:bg-slate-300'}`}>BlackMarket</button>
-                        <button onClick={() => setCurrentSiteId('neohome')} className={`px-2 py-0.5 rounded transition-colors ${currentSiteId === 'neohome' ? 'bg-blue-600 text-white' : 'hover:bg-slate-300'}`}>NeoHome Corp</button>
+                        <button onClick={() => { setCurrentSiteId('neohome'); setNeoHomeTab('portal'); }} className={`px-2 py-0.5 rounded transition-colors ${currentSiteId === 'neohome' ? 'bg-blue-600 text-white' : 'hover:bg-slate-300'}`}>NeoHome Corp</button>
                     </div>
                     {isLoading && <div className="h-1 w-full bg-slate-200 z-10 relative"><div className="h-full bg-blue-500 transition-all duration-75" style={{ width: `${loadProgress}%` }}></div></div>}
 
@@ -1359,37 +1356,108 @@
                                 </div>
                             </div>
                         ) : (
-                            <div className="max-w-2xl mx-auto p-6">
-                                <header className="border-b-2 border-blue-600 pb-4 mb-6 flex justify-between items-end">
-                                    <div><h1 className="text-3xl text-blue-700 font-black tracking-tight">NeoHome Corp.</h1><p className="text-slate-500 text-sm mt-1">Ihr Partner für urbanes Wohnen und Smart-KI.</p></div>
-                                    <div className="text-right text-xs">Willkommen,<br/><span className="font-bold">{playerState.profile.name} (Sektor 4)</span></div>
+                            <div className="max-w-2xl mx-auto flex flex-col min-h-full">
+                                <header className="bg-blue-900 text-white p-6 shadow-md shrink-0">
+                                    <div className="flex justify-between items-end mb-4">
+                                        <div>
+                                            <h1 className="text-3xl font-black tracking-tighter">NeoHome Corp.</h1>
+                                            <p className="text-blue-200 text-sm mt-1">Die Beton-Kraken von NeonCity.</p>
+                                        </div>
+                                        <div className="text-right text-xs text-blue-300">
+                                            Subjekt:<br/><span className="font-bold text-white">{playerState.profile.name} (Sektor 4)</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-4 border-t border-blue-800 pt-4 font-bold text-sm">
+                                        <button onClick={() => setNeoHomeTab('portal')} className={`pb-1 border-b-2 transition-colors ${neoHomeTab === 'portal' ? 'border-white text-white' : 'border-transparent text-blue-400 hover:text-blue-200'}`}>Mieter-Portal</button>
+                                        <button onClick={() => setNeoHomeTab('shop')} className={`pb-1 border-b-2 transition-colors ${neoHomeTab === 'shop' ? 'border-white text-white' : 'border-transparent text-blue-400 hover:text-blue-200'}`}>Einrichtungshaus</button>
+                                        <button onClick={() => setNeoHomeTab('dossier')} className={`pb-1 border-b-2 transition-colors ${neoHomeTab === 'dossier' ? 'border-white text-white' : 'border-transparent text-blue-400 hover:text-blue-200'}`}>Firmen-Dossier</button>
+                                    </div>
                                 </header>
-                                <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-8 shadow-sm">
-                                    <h2 className="font-bold text-blue-800 mb-4 flex items-center gap-2"><UserIcon className="w-5 h-5"/> Mieter-Portal</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="bg-white p-4 border border-slate-200 rounded shadow-sm flex flex-col justify-between">
-                                            <div><h3 className="font-bold text-slate-700 text-sm">Monatsmiete</h3><p className="text-xs text-slate-500 mt-1 mb-3">Ausstehende Zahlungen verhindern Upgrades.</p></div>
-                                            {playerState.tenant?.rentPaid ? <div className="text-green-600 font-bold text-sm text-center py-2 bg-green-50 rounded">BEZAHLT</div> : <button onClick={payRent} disabled={playerState.credits < 500} className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-sm disabled:opacity-50">ZAHLEN (500 CR)</button>}
-                                        </div>
-                                        <div className="bg-white p-4 border border-slate-200 rounded shadow-sm flex flex-col justify-between">
-                                            <div><h3 className="font-bold text-slate-700 text-sm">KI-Lizenz: E.V.A. Premium</h3><p className="text-xs text-slate-500 mt-1 mb-3">Aktiviert das Empathie-Paket.</p></div>
-                                            {playerState.tenant?.evaPremium ? <div className="text-pink-500 font-bold text-sm text-center py-2 bg-pink-50 rounded border border-pink-100">AKTIV & GLÜCKLICH</div> : <button onClick={upgradeEva} disabled={!playerState.tenant?.rentPaid || playerState.credits < 1500} className="w-full py-2 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded text-sm disabled:opacity-50">LIZENZ KAUFEN (1500 CR)</button>}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-300 pb-2"><ShoppingCartIcon className="w-5 h-5"/> NeoHome Einrichtungshaus</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {FURNITURE_ITEMS.map(item => {
-                                            const isBought = playerState.furniture?.includes(item.id);
-                                            return (
-                                                <div key={item.id} className={`p-4 bg-white border rounded shadow-sm flex flex-col justify-between ${isBought ? 'border-green-300 opacity-70' : 'border-slate-200'}`}>
-                                                    <div><h3 className="font-bold text-slate-800 text-sm">{item.name}</h3><p className="text-xs text-slate-600 mt-1 mb-2 h-8">{item.desc}</p></div>
-                                                    <button onClick={() => buyFurniture(item)} disabled={isBought || playerState.credits < item.cost} className={`w-full py-1.5 text-xs font-bold rounded ${isBought ? 'bg-green-100 text-green-700 border border-green-200' : playerState.credits >= item.cost ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'}`}>{isBought ? 'GELIEFERT' : `BESTELLEN (${item.cost} CR)`}</button>
+                                
+                                <div className="p-6 flex-1 bg-white">
+                                    {neoHomeTab === 'portal' && (
+                                        <div className="animate-fade-in">
+                                            <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-lg border-b pb-2"><UserIcon className="w-5 h-5 text-blue-600"/> Verwaltungs- & Zahlungsportal</h2>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="bg-slate-50 p-5 border border-slate-200 rounded shadow-sm flex flex-col justify-between">
+                                                    <div>
+                                                        <h3 className="font-bold text-slate-800">Monatsmiete Sektor 4</h3>
+                                                        <p className="text-xs text-slate-500 mt-2 mb-4">Warnung: Bei Zahlungsverzug greift die automatisierte Zwangsräumung. Tür-Codes werden ohne Vorwarnung geändert.</p>
+                                                    </div>
+                                                    {playerState.tenant?.rentPaid ? (
+                                                        <div className="text-green-600 font-bold text-sm py-2 px-4 bg-green-100 border border-green-200 rounded text-center">VERBUCHT - ZWANGSRÄUMUNG AUSGESETZT</div>
+                                                    ) : (
+                                                        <button onClick={payRent} disabled={playerState.credits < 500} className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-sm disabled:opacity-50 transition-colors shadow-md">
+                                                            ZAHLEN (500 CR)
+                                                        </button>
+                                                    )}
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
+
+                                                <div className="bg-slate-50 p-5 border border-slate-200 rounded shadow-sm flex flex-col justify-between">
+                                                    <div>
+                                                        <h3 className="font-bold text-slate-800">E.V.A. Lizenz-Upgrade</h3>
+                                                        <p className="text-xs text-slate-500 mt-2 mb-4">Neo-Platinum Lizenz: Empathie-Simulation & Data-Mining Level 3. Wir kennen Ihre Bedürfnisse, bevor Sie sie haben.</p>
+                                                    </div>
+                                                    {playerState.tenant?.evaPremium ? (
+                                                        <div className="text-pink-600 font-bold text-sm py-2 px-4 bg-pink-100 border border-pink-200 rounded text-center">DATA-MINING AKTIV</div>
+                                                    ) : (
+                                                        <button onClick={upgradeEva} disabled={!playerState.tenant?.rentPaid || playerState.credits < 1500} className="w-full py-2 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded text-sm disabled:opacity-50 transition-colors shadow-md">
+                                                            LIZENZ KAUFEN (1500 CR)
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {neoHomeTab === 'shop' && (
+                                        <div className="animate-fade-in">
+                                            <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-lg border-b pb-2"><ShoppingCartIcon className="w-5 h-5 text-blue-600"/> NeoHome Marketplace</h2>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {FURNITURE_ITEMS.map(item => {
+                                                    const isBought = playerState.furniture?.includes(item.id);
+                                                    return (
+                                                        <div key={item.id} className={`p-4 bg-white border rounded shadow-sm flex flex-col justify-between transition-colors ${isBought ? 'border-green-300 bg-green-50/50' : 'border-slate-200 hover:border-blue-400'}`}>
+                                                            <div>
+                                                                <h3 className="font-bold text-slate-800">{item.name}</h3>
+                                                                <p className="text-xs text-slate-600 mt-1 mb-4 h-8">{item.desc}</p>
+                                                            </div>
+                                                            <button onClick={() => buyFurniture(item)} disabled={isBought || playerState.credits < item.cost} className={`w-full py-2 text-xs font-bold rounded transition-colors ${isBought ? 'bg-green-100 text-green-700 border border-green-200' : playerState.credits >= item.cost ? 'bg-slate-800 hover:bg-slate-700 text-white shadow-md' : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'}`}>
+                                                                {isBought ? 'GELIEFERT' : `KAUFEN (${item.cost} CR)`}
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {neoHomeTab === 'dossier' && (
+                                        <div className="animate-fade-in text-sm text-slate-700 space-y-6 leading-relaxed">
+                                            <h2 className="font-bold text-slate-900 text-xl border-b pb-2">Die Krise als Geschäftsmodell</h2>
+                                            <p>NeoHome Corp. wurde 2031 während der großen globalen "Urbanen Krise" gegründet. Damals kollabierten die Wohnungsmärkte in den Megastädten, und Millionen von Menschen konnten sich das Leben in den Metropolen nicht mehr leisten. Während Regierungen versagten, sah NeoHome seine Chance: Sie kauften bankrotte Stadtviertel, verlassene Bürokomplexe und alte Industrieanlagen für Spottpreise auf.</p>
+                                            <p>Wir sanierten nicht im klassischen Sinne. Wir automatisierten. Durch die Installation von Basis-KIs (den Vorläufern von E.V.A.) entließen wir 90 % der menschlichen Hausverwalter, Hausmeister und Sicherheitsdienste. Wohnraum wurde in winzige "Lebenszellen" unterteilt. NeoHome hat das Wohnen nicht verbessert, wir haben es zu einem Abo-Modell mit Mikrotransaktionen gemacht.</p>
+
+                                            <h3 className="font-bold text-slate-900 text-lg mt-6">Standort & Präsenz in NeonCity</h3>
+                                            <div className="grid md:grid-cols-2 gap-4">
+                                                <div className="bg-slate-50 p-4 border border-slate-200 rounded">
+                                                    <h4 className="font-bold text-blue-600 mb-1">Sektor 1 (Das Zenit)</h4>
+                                                    <p className="text-xs">Hier steht unser Hauptquartier, "Der Monolith". Ein 180 Stockwerke hohes Gebäude aus schwarzem Glas und blendendem Neon. Hier leben die absolute Elite in klimatisierten Penthouse-Suiten mit Platinum-E.V.A.s, die nahezu menschlich wirken.</p>
+                                                </div>
+                                                <div className="bg-slate-50 p-4 border border-slate-200 rounded">
+                                                    <h4 className="font-bold text-slate-600 mb-1">Sektor 4 (Der Rostgürtel)</h4>
+                                                    <p className="text-xs">Eine reine "Cashcow". Es gibt hier keine physischen Mitarbeiter mehr, nur noch Drohnen und das E.V.A.-System. Reparaturen werden ignoriert, solange die strukturelle Integrität des Gebäudes nicht unter 40 % fällt.</p>
+                                                </div>
+                                            </div>
+
+                                            <h3 className="font-bold text-slate-900 text-lg mt-6">Mikro-Monetarisierung der Existenz</h3>
+                                            <ul className="list-disc pl-5 space-y-2">
+                                                <li><strong>Data-Mining:</strong> Jede E.V.A. überwacht ihre Bewohner rund um die Uhr. Diese Daten werden an Werbekonzerne, Versicherungen und Dritte verkauft.</li>
+                                                <li><strong>Abo-Fallen & Drosselung:</strong> Wasser, Strom und Heizung sind Premium-Features. Bei Zahlungsverzug wird die Lebenserhaltung gedrosselt.</li>
+                                                <li><strong>Automatisierte Zwangsräumung:</strong> Wenn ein Mieter als "unprofitabel" eingestuft wird, ändert E.V.A. die Tür-Codes. Das Inventar geht in unseren Besitz über.</li>
+                                            </ul>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -1509,7 +1577,7 @@
                     <div className="p-3 bg-blue-900 border-b-2 border-red-500 flex justify-between items-center shrink-0">
                         <div className="flex items-center gap-2 font-bold tracking-widest text-red-100">
                             <ShieldIcon className="w-5 h-5 text-red-500" />
-                            NCPD_ZENTRALREGISTER
+                            NEONCITY POLICE DEPT. // NCPD-AKTE
                         </div>
                         <div className="animate-pulse w-2 h-2 rounded-full bg-red-500"></div>
                     </div>
@@ -1613,7 +1681,6 @@
             );
         };
 
-        // App-Definitionen für das Menü und die Taskleiste
         const APPS = {
             story: { id: 'story', name: 'Dokumente', icon: FileTextIcon, color: 'text-blue-400', borderColor: 'border-blue-500', component: StoryApp, title: "NH-EVA-4092-Rev.C.pdf", defaultPos: { x: 40, y: 40 }, defaultSize: { width: 550, height: 600 }, showOnDesktop: true, showInStart: false },
             miner: { id: 'miner', name: 'NetRunner', icon: DatabaseIcon, color: 'text-green-400', borderColor: 'border-green-500', component: CryptoApp, title: "NETRUNNER_MINING_CORE", defaultPos: { x: 60, y: 20 }, defaultSize: { width: 500, height: 500 }, showOnDesktop: true, showInStart: false },
@@ -1661,18 +1728,18 @@
             inventory: { NNC: 0.0, BYC: 0.0, VDT: 0.0 },
             profile: { name: 'Nathan', role: 'Gast-Zugang', level: 1, totalHacks: 0 },
             upgrades: { adBlocker: false, connectionSpeed: 1, cpuLevel: 1, ramLevel: 1, gpuLevel: 0, coolingLevel: 1 },
-            settings: { crtScanlines: false, audioFeedback: false }, // NEU: Speichert Systemeinstellungen
+            settings: { crtScanlines: false, audioFeedback: false },
             hardware: { cpu: 'Basic Cyber-Core v1', gpu: 'Keine (Onboard Graphics)', ram: '4GB DDR-Synth', network: '56k Proxy-Link', cooling: 'Passiv (Defekt)' },
             market: {
                 NNC: { price: 0.5, history: Array(40).fill(0.5), trend: 0 },
                 BYC: { price: 2.5, history: Array(40).fill(2.5), trend: 0 },
                 VDT: { price: 15.0, history: Array(40).fill(15.0), trend: 0 }
             },
-            marketAlerts: [], // NEU: Speichert die User-Alarme
+            marketAlerts: [],
             marketNews: [],
             mails: [
-                { id: 1, sender: "E.V.A.", subject: "Wohnungs-Status: Kritisch", body: "Guten Tag Nathan.\n\nIch möchte Sie freundlich, aber bestimmt darauf hinweisen, dass sämtliche Möbelstücke letzte Nacht während Ihres Schlafes konfisziert wurden. \n\nIhre aktuelle Schlafgelegenheit: Synthetischer Polymer-Boden. \nGeschätzter Erholungsfaktor: 0%.\n\nDa Ihr Premium-Empathie-Paket abgelaufen ist, erspare ich mir aufbauende Worte.\nEmpfehlung: Nutzen Sie Ihr Terminal OS, um umgehend erste Credits zu generieren. Andernfalls wird der Vermieter-Konzern voraussichtlich in 48 Stunden auch Ihre Lebenserhaltung wegen Zahlungsverzug deaktivieren.\n\nGezeichnet,\nE.V.A. (Ihre Wohnungs-KI)", date: "02:04 AM", read: false },
-                { id: 2, sender: "Unknown_Proxy", subject: "RE: Gigs", body: "Hab gehört, du bist wieder online, Nathan. \n\nDein Apartment wurde komplett entkernt, was? Pech für dich. Wenn du ein paar schnelle Credits brauchst, um nicht zu verhungern, nutz die NetRunner App auf deinem Desktop. \n\nIst simpel: Du entschlüsselst Datenpakete (Kryptos) und vertickst sie auf dem Market Exchange. Wenn du Hardware-Upgrades brauchst, um den Prozess zu beschleunigen, lad den Nexus Browser runter und geh auf den BlackMarket.\n\nLass dich nicht von den Syndikaten erwischen.\n\n- V.", date: "02:45 AM", read: false }
+                { id: 1, sender: "E.V.A.", subject: "Wohnungs-Status: Neo-Restriktiv", body: "Guten Tag Mieter #894-B (Nathan).\n\nIch registriere das vollständige Fehlen Ihres Wohnungsinventars. \nGemäß FAQ, Frage 2: E.V.A. macht keine Fehler. Bei unautorisierter Entfernung von Inventar greift Paragraph 4b des Mietvertrags. NeoHome Corp. übernimmt keine Haftung für Diebstahl.\n\nZudem befinden Sie sich im Zahlungsverzug. Der 'Neo-Restriktiv' Modus wurde aktiviert. Raumtemperatur auf 16°C gesenkt. Empathie-Modul deaktiviert.\n\nEmpfehlung: Nutzen Sie Ihr Terminal OS zur Liquiditätsbeschaffung. Andernfalls erfolgt die automatisierte Zwangsräumung durch Änderung der Tür-Codes.", date: "02:04 AM", read: false },
+                { id: 2, sender: "Unknown_Proxy", subject: "RE: Gigs", body: "Hab gehört, du bist wieder online, Nathan. \n\nDein Apartment in Sektor 4 wurde entkernt, was? Typisch NeoHome. Wenn du schnelle Credits brauchst, nutz die NetRunner App auf dem Desktop. \n\nDu entschlüsselst Datenpakete und vertickst sie auf dem Market Exchange. Für Hardware-Upgrades lad den Nexus Browser runter und geh auf den BlackMarket.\n\nPass auf das NeonCity Police Department (NCPD) auf. Die Gigs auf dem ShadowBoard sind lukrativ, aber riskant.\n\n- V.", date: "02:45 AM", read: false }
             ],
             tenant: { rentPaid: false, evaPremium: false },
             furniture: [],
@@ -1690,7 +1757,7 @@
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
                 
-                oscillator.type = 'sine'; // Weicher futuristischer Ton
+                oscillator.type = 'sine';
                 oscillator.frequency.setValueAtTime(1200, audioCtx.currentTime);
                 oscillator.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
                 
@@ -1725,12 +1792,12 @@
                             ...parsed,
                             gpuHeat: parsed.gpuHeat || 0,
                             upgrades: { ...DEFAULT_PLAYER_STATE.upgrades, ...(parsed.upgrades || {}) },
-                            settings: { ...DEFAULT_PLAYER_STATE.settings, ...(parsed.settings || {}) }, // NEU laden
+                            settings: { ...DEFAULT_PLAYER_STATE.settings, ...(parsed.settings || {}) },
                             hardware: { ...DEFAULT_PLAYER_STATE.hardware, ...(parsed.hardware || {}) },
                             inventory: { ...DEFAULT_PLAYER_STATE.inventory, ...(parsed.inventory || {}) },
                             profile: { ...DEFAULT_PLAYER_STATE.profile, ...(parsed.profile || {}) },
                             market: parsed.market || DEFAULT_PLAYER_STATE.market, 
-                            marketAlerts: parsed.marketAlerts || [], // NEU laden
+                            marketAlerts: parsed.marketAlerts || [],
                             marketNews: parsed.marketNews || [],
                             mails: parsed.mails && parsed.mails.length > 0 ? parsed.mails : DEFAULT_PLAYER_STATE.mails,
                             tenant: { ...DEFAULT_PLAYER_STATE.tenant, ...(parsed.tenant || {}) },
@@ -1782,7 +1849,6 @@
                             newMarket[coin] = { price: newPrice, history: [...currentData.history, newPrice].slice(-40), trend: newPrice - currentData.price };
                         });
 
-                        // NEU: Market Alerts überprüfen
                         let currentAlerts = prev.marketAlerts || [];
                         let alertsToKeep = [];
                         let alertsTriggered = [];
@@ -1869,7 +1935,7 @@
                 
                 window.addEventListener('gig-complete', handleGigComplete);
                 window.addEventListener('gig-caught', handleGigCaught);
-                window.addEventListener('market-alert', handleMarketAlert); // NEU
+                window.addEventListener('market-alert', handleMarketAlert); 
                 return () => { 
                     window.removeEventListener('gig-complete', handleGigComplete); 
                     window.removeEventListener('gig-caught', handleGigCaught); 
@@ -1898,14 +1964,12 @@
                 <div 
                     className="flex flex-col h-full w-full bg-slate-950 text-white font-sans relative overflow-hidden" 
                     onClickCapture={(e) => {
-                        // Globaler Audio-Trigger für alles was klickbar ist
                         if (playerState.settings?.audioFeedback && (e.target.closest('button') || e.target.closest('.cursor-pointer'))) {
                             playClickSound();
                         }
                     }}
                     onClick={() => isStartMenuOpen && setIsStartMenuOpen(false)}
                 >
-                    {/* Der CRT Overlay */}
                     {playerState.settings?.crtScanlines && <div className="crt-scanlines"></div>}
                     
                     <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(34, 211, 238, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 211, 238, 0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
@@ -2019,7 +2083,7 @@
                     @keyframes systemFlash { 0%, 75% { opacity: 0; } 95% { opacity: 1; } 100% { opacity: 0; } }
                     .animate-system-flash { animation: systemFlash 3.5s ease-in-out forwards; }
                     
-                    /* NEU: CRT Scanlines Filter */
+                    /* CRT Scanlines Filter */
                     .crt-scanlines {
                         position: absolute;
                         top: 0; left: 0; right: 0; bottom: 0;
