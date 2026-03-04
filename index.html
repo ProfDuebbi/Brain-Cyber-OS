@@ -212,7 +212,6 @@
             </svg>
         );
 
-        // --- NEUES ICON FÜR EXCHANGE ---
         const BarChartIcon = ({ className }) => (
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 <line x1="12" y1="20" x2="12" y2="10"></line>
@@ -260,16 +259,38 @@
         ];
 
         const CHANGELOG_DATA = [
-            { version: "v2.5.0", date: "AKTUELL", changes: ["Nexus Exchange App implementiert", "NetRunner von Trading-Funktionen getrennt", "Advanced Trading UI hinzugefügt"] },
-            { version: "v2.4.0", date: "ARCHIV", changes: ["Dynamische Gigs (Belohnungen in Krypto & CR) hinzugefügt", "Risiko-Faktor & Polizei-Strafensystem implementiert", "NCPD Polizeiakte-App integriert"] },
-            { version: "v2.3.0", date: "ARCHIV", changes: ["ShadowBoard App (Gigs & Missionen) hinzugefügt", "SmartCam App (Echtzeit-Wohnungsvisualisierung) integriert"] },
-            { version: "v2.2.0", date: "ARCHIV", changes: ["SecureMail Client integriert", "Dynamische OS-Versionsanzeige implementiert", "Story-Mails von E.V.A. hinzugefügt"] },
-            { version: "v2.1.0", date: "ARCHIV", changes: ["Systemweite OS-Benachrichtigungen (Push) implementiert", "Changelog-Archiv in System-App integriert"] },
-            { version: "v2.0.5", date: "ARCHIV", changes: ["Dynamisches Krypto-Market-System", "Echtzeit-Graphen & Market-News-Feed", "Zentrale Portfolio-Dashboard App hinzugefügt"] },
-            { version: "v1.5.0", date: "ARCHIV", changes: ["Nexus Browser implementiert", "BlackMarket Shop mit Hardware-Upgrades", "Ad-Popups und Proxy-Simulation"] },
-            { version: "v1.2.0", date: "ARCHIV", changes: ["Passives GPU-Mining hinzugefügt", "Thermal-Management (Hitze-System & Kühlung)"] },
-            { version: "v1.1.0", date: "ARCHIV", changes: ["Frei bewegliche & skalierbare Fenster (Desktop-Manager)", "Persistente Speicherung (Auto-Save)"] },
-            { version: "v1.0.0", date: "ARCHIV", changes: ["Initiales Terminal OS Boot-System", "NetRunner Crypto-Clicker Basis"] }
+            { 
+                version: "v0.2.0Alpha", 
+                date: "AKTUELL", 
+                changes: [
+                    "Zusammenführung aller bisherigen Features zur ersten spielbaren Alpha",
+                    "Dynamisches Krypto-Market-System mit Trading-UI und Preis-Alarmen",
+                    "ShadowBoard App (Gigs & Missionen) inkl. Risiko- und Polizei-Strafsystem",
+                    "Nexus Browser, BlackMarket Hardware-Shop & NeoHome Möbel-Portal",
+                    "SmartCam App (Echtzeit-Wohnungsvisualisierung) integriert",
+                    "SecureMail Client mit interaktiven Story-Mails (E.V.A.)",
+                    "Passives GPU-Mining mit Thermal-Management (Hitze & Kühlung)",
+                    "Systemweite OS-Benachrichtigungen (Push Alerts) hinzugefügt"
+                ] 
+            },
+            { 
+                version: "v0.1.0Alpha", 
+                date: "ARCHIV", 
+                changes: [
+                    "Start der Story-Elemente hinzugefügt",
+                    "Logische Grundgerüste im OS erstellt, um das System nutzbar zu machen",
+                    "Frei bewegliche & skalierbare Fenster (Desktop-Manager) etabliert",
+                    "Persistente Datenspeicherung (Auto-Save) implementiert"
+                ] 
+            },
+            { 
+                version: "v0.0.1Alpha", 
+                date: "ARCHIV", 
+                changes: [
+                    "Grundgerüst des Terminal OS erstellt",
+                    "Grundidee des Cyberpunk Clicker-Konzepts definiert"
+                ] 
+            }
         ];
 
         const Sparkline = ({ data, color }) => {
@@ -486,9 +507,23 @@
             </div>
         );
 
-        const SettingsApp = ({ playerState }) => {
+        const SettingsApp = ({ playerState, setPlayerState }) => {
             const [activeTab, setActiveTab] = useState('INFO');
             const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+            // Hilfsfunktion zum Umschalten der Einstellungen
+            const toggleSetting = (settingKey) => {
+                setPlayerState(prev => {
+                    const currentSettings = prev.settings || { crtScanlines: false, audioFeedback: false };
+                    return {
+                        ...prev,
+                        settings: {
+                            ...currentSettings,
+                            [settingKey]: !currentSettings[settingKey]
+                        }
+                    };
+                });
+            };
 
             return (
                 <div className="font-mono text-slate-300 flex flex-col h-full">
@@ -524,11 +559,21 @@
                         <div className="space-y-4">
                             <div className="flex justify-between items-center bg-slate-950 p-3 rounded border border-slate-800">
                                 <div><div className="text-white">CRT-Scanlines</div><div className="text-xs text-slate-500">Visueller Retro-Filter für das Terminal OS</div></div>
-                                <button className="w-12 h-6 bg-cyan-600 rounded-full relative cursor-pointer"><div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
+                                <button 
+                                    onClick={() => toggleSetting('crtScanlines')} 
+                                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${playerState.settings?.crtScanlines ? 'bg-cyan-600' : 'bg-slate-700'}`}
+                                >
+                                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${playerState.settings?.crtScanlines ? 'right-1' : 'left-1'}`}></div>
+                                </button>
                             </div>
                             <div className="flex justify-between items-center bg-slate-950 p-3 rounded border border-slate-800">
                                 <div><div className="text-white">Audio-Feedback</div><div className="text-xs text-slate-500">Haptische und auditive UI-Reaktionen</div></div>
-                                <button className="w-12 h-6 bg-cyan-600 rounded-full relative cursor-pointer"><div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
+                                <button 
+                                    onClick={() => toggleSetting('audioFeedback')} 
+                                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${playerState.settings?.audioFeedback ? 'bg-cyan-600' : 'bg-slate-700'}`}
+                                >
+                                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${playerState.settings?.audioFeedback ? 'right-1' : 'left-1'}`}></div>
+                                </button>
                             </div>
                             {showResetConfirm ? (
                                 <div className="flex justify-between items-center bg-red-900 p-3 rounded border border-red-500 mt-8 animate-fade-in">
@@ -844,6 +889,11 @@
         const MarketApp = ({ playerState, setPlayerState, addNotification }) => {
             const [marketSelectedCoin, setMarketSelectedCoin] = useState('NNC');
             const [tradeInput, setTradeInput] = useState('1.00');
+            const [rightPanelTab, setRightPanelTab] = useState('TRADE'); // NEU: Tabs ('TRADE' | 'ALERTS')
+            
+            // State für das Setzen neuer Alerts
+            const [alertCondition, setAlertCondition] = useState('above'); 
+            const [alertPrice, setAlertPrice] = useState('');
 
             const handleTrade = (action, isAll = false) => {
                 const currentPrice = playerState.market?.[marketSelectedCoin]?.price || CRYPTO_TYPES[marketSelectedCoin].value;
@@ -891,6 +941,30 @@
                     const availableCrypto = playerState.inventory[marketSelectedCoin];
                     setTradeInput((availableCrypto * pct).toFixed(2));
                 }
+            };
+
+            // NEU: Logik zum Hinzufügen von Alarmen
+            const handleAddAlert = () => {
+                const price = parseFloat(alertPrice);
+                if (isNaN(price) || price <= 0) return;
+
+                setPlayerState(prev => ({
+                    ...prev,
+                    marketAlerts: [
+                        ...(prev.marketAlerts || []),
+                        { id: Date.now(), coin: marketSelectedCoin, condition: alertCondition, targetPrice: price }
+                    ]
+                }));
+                setAlertPrice('');
+                addNotification("ALERT GESETZT", `Du wirst benachrichtigt, wenn ${marketSelectedCoin} ${alertCondition === 'above' ? 'über' : 'unter'} ${price.toFixed(2)} CR erreicht.`, "info");
+            };
+
+            // NEU: Logik zum Entfernen von Alarmen
+            const removeAlert = (alertId) => {
+                setPlayerState(prev => ({
+                    ...prev,
+                    marketAlerts: (prev.marketAlerts || []).filter(a => a.id !== alertId)
+                }));
             };
 
             return (
@@ -962,63 +1036,125 @@
                             })()}
                         </div>
 
+                        {/* RECHTE SPALTE: TRADING / ALERTS TERMINAL */}
                         <div className="w-full lg:w-72 flex flex-col gap-4 flex-shrink-0">
-                            <div className="bg-slate-900 border border-slate-700 p-4 rounded flex flex-col gap-4 shadow-lg">
-                                <h3 className="text-white font-bold border-b border-slate-800 pb-2 mb-1 flex items-center gap-2">
-                                    <ActivityIcon className="w-4 h-4 text-cyan-400"/> ORDER_EXECUTION
-                                </h3>
-                                
-                                <div className="flex justify-between text-xs text-slate-400">
-                                    <div className="flex flex-col"><span>Wallet:</span><span className="text-white font-bold">{playerState.inventory[marketSelectedCoin].toFixed(2)} {marketSelectedCoin}</span></div>
-                                    <div className="flex flex-col text-right"><span>Liquide:</span><span className="text-cyan-400 font-bold">{playerState.credits.toFixed(2)} CR</span></div>
-                                </div>
-
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-[10px] text-slate-500">MENGE (AMOUNT)</label>
-                                    <div className="relative">
-                                        <input 
-                                            type="number" 
-                                            value={tradeInput}
-                                            onChange={(e) => setTradeInput(e.target.value)}
-                                            className="w-full bg-black border border-slate-600 focus:border-cyan-500 rounded p-2 text-white font-mono text-sm outline-none transition-colors"
-                                            placeholder="0.00"
-                                        />
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-bold">{marketSelectedCoin}</div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                    <div className="text-[10px] text-slate-500 text-center">BUY %</div>
-                                    <div className="text-[10px] text-slate-500 text-center">SELL %</div>
-                                    
-                                    <div className="grid grid-cols-2 gap-1">
-                                        <button onClick={() => setPercentageAmount(0.5, 'BUY')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">50%</button>
-                                        <button onClick={() => setPercentageAmount(1.0, 'BUY')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">MAX</button>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-1">
-                                        <button onClick={() => setPercentageAmount(0.5, 'SELL')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">50%</button>
-                                        <button onClick={() => setPercentageAmount(1.0, 'SELL')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">MAX</button>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3 mt-2">
+                            
+                            <div className="bg-slate-900 border border-slate-700 p-4 rounded flex flex-col shadow-lg flex-1">
+                                {/* NEU: Tabs für das Control Panel */}
+                                <div className="flex border-b border-slate-800 pb-2 mb-4 gap-6 shrink-0">
                                     <button 
-                                        onClick={() => handleTrade('BUY')}
-                                        className="py-3 bg-green-600 hover:bg-green-500 text-white text-sm font-bold tracking-widest rounded transition-all active:scale-95 shadow-[0_0_10px_rgba(22,163,74,0.3)] cursor-pointer"
+                                        onClick={() => setRightPanelTab('TRADE')} 
+                                        className={`font-bold flex items-center gap-2 text-xs tracking-wider transition-colors ${rightPanelTab === 'TRADE' ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-slate-500 hover:text-slate-300 border-b-2 border-transparent'}`}
                                     >
-                                        BUY
+                                        <ActivityIcon className="w-4 h-4"/> TRADE
                                     </button>
                                     <button 
-                                        onClick={() => handleTrade('SELL')}
-                                        className="py-3 bg-red-600 hover:bg-red-500 text-white text-sm font-bold tracking-widest rounded transition-all active:scale-95 shadow-[0_0_10px_rgba(220,38,38,0.3)] cursor-pointer"
+                                        onClick={() => setRightPanelTab('ALERTS')} 
+                                        className={`font-bold flex items-center gap-2 text-xs tracking-wider transition-colors ${rightPanelTab === 'ALERTS' ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-slate-500 hover:text-slate-300 border-b-2 border-transparent'}`}
                                     >
-                                        SELL
+                                        <BellIcon className="w-4 h-4"/> ALERTS
                                     </button>
                                 </div>
+
+                                {rightPanelTab === 'TRADE' ? (
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex justify-between text-xs text-slate-400">
+                                            <div className="flex flex-col"><span>Wallet:</span><span className="text-white font-bold">{playerState.inventory[marketSelectedCoin].toFixed(2)} {marketSelectedCoin}</span></div>
+                                            <div className="flex flex-col text-right"><span>Liquide:</span><span className="text-cyan-400 font-bold">{playerState.credits.toFixed(2)} CR</span></div>
+                                        </div>
+
+                                        <div className="flex flex-col gap-1">
+                                            <label className="text-[10px] text-slate-500">MENGE (AMOUNT)</label>
+                                            <div className="relative">
+                                                <input 
+                                                    type="number" 
+                                                    value={tradeInput}
+                                                    onChange={(e) => setTradeInput(e.target.value)}
+                                                    className="w-full bg-black border border-slate-600 focus:border-cyan-500 rounded p-2 text-white font-mono text-sm outline-none transition-colors"
+                                                    placeholder="0.00"
+                                                />
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-bold">{marketSelectedCoin}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                            <div className="text-[10px] text-slate-500 text-center">BUY %</div>
+                                            <div className="text-[10px] text-slate-500 text-center">SELL %</div>
+                                            
+                                            <div className="grid grid-cols-2 gap-1">
+                                                <button onClick={() => setPercentageAmount(0.5, 'BUY')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">50%</button>
+                                                <button onClick={() => setPercentageAmount(1.0, 'BUY')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">MAX</button>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-2 gap-1">
+                                                <button onClick={() => setPercentageAmount(0.5, 'SELL')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">50%</button>
+                                                <button onClick={() => setPercentageAmount(1.0, 'SELL')} className="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded transition-colors text-slate-300">MAX</button>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3 mt-2">
+                                            <button onClick={() => handleTrade('BUY')} className="py-3 bg-green-600 hover:bg-green-500 text-white text-sm font-bold tracking-widest rounded transition-all active:scale-95 shadow-[0_0_10px_rgba(22,163,74,0.3)] cursor-pointer">BUY</button>
+                                            <button onClick={() => handleTrade('SELL')} className="py-3 bg-red-600 hover:bg-red-500 text-white text-sm font-bold tracking-widest rounded transition-all active:scale-95 shadow-[0_0_10px_rgba(220,38,38,0.3)] cursor-pointer">SELL</button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col gap-4 flex-1">
+                                        <div className="text-xs text-slate-400">
+                                            Neuer Preis-Alarm für <span className="text-white font-bold">{marketSelectedCoin}</span>
+                                        </div>
+                                        
+                                        <div className="flex gap-2">
+                                            <select 
+                                                value={alertCondition} 
+                                                onChange={e => setAlertCondition(e.target.value)}
+                                                className="bg-black border border-slate-600 text-white text-xs font-mono rounded p-2 outline-none cursor-pointer"
+                                            >
+                                                <option value="above">Steigt über (&gt;)</option>
+                                                <option value="below">Fällt unter (&lt;)</option>
+                                            </select>
+                                            <input 
+                                                type="number" 
+                                                value={alertPrice}
+                                                onChange={e => setAlertPrice(e.target.value)}
+                                                placeholder="0.00 CR"
+                                                className="flex-1 min-w-0 bg-black border border-slate-600 focus:border-cyan-500 rounded p-2 text-white font-mono text-xs outline-none transition-colors"
+                                            />
+                                        </div>
+                                        
+                                        <button 
+                                            onClick={handleAddAlert}
+                                            className="w-full py-2 bg-slate-800 hover:bg-cyan-900/50 text-cyan-400 border border-slate-700 hover:border-cyan-500 text-xs font-bold tracking-widest rounded transition-all cursor-pointer"
+                                        >
+                                            + ALERT SPEICHERN
+                                        </button>
+
+                                        <div className="mt-2 border-t border-slate-800 pt-4 flex-1 flex flex-col min-h-0">
+                                            <div className="text-[10px] text-slate-500 mb-2 shrink-0">AKTIVE ALARME:</div>
+                                            <div className="overflow-y-auto custom-scrollbar flex-1 pr-1">
+                                                {(!playerState.marketAlerts || playerState.marketAlerts.length === 0) ? (
+                                                    <div className="text-xs text-slate-600 italic">Keine Trigger aktiv.</div>
+                                                ) : (
+                                                    playerState.marketAlerts.map(alert => (
+                                                        <div key={alert.id} className="flex justify-between items-center p-2 bg-black border border-slate-800 rounded mb-2">
+                                                            <div className="text-xs text-slate-300">
+                                                                <span className="font-bold text-white">{alert.coin}</span> {alert.condition === 'above' ? '>' : '<'} <span className="text-cyan-400">{alert.targetPrice.toFixed(2)}</span>
+                                                            </div>
+                                                            <button 
+                                                                onClick={() => removeAlert(alert.id)}
+                                                                className="text-slate-500 hover:text-red-500 p-1 cursor-pointer"
+                                                            >
+                                                                <XIcon className="w-3 h-3" />
+                                                            </button>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="flex-1 bg-black border border-slate-800 rounded flex flex-col min-h-[150px]">
+                            <div className="bg-black border border-slate-800 rounded flex flex-col h-40 shrink-0">
                                 <div className="p-2 border-b border-slate-800 text-xs font-bold text-slate-500 flex items-center gap-2 bg-slate-900/50 shrink-0">
                                     <NewspaperIcon className="w-4 h-4"/> MARKET_FEED
                                 </div>
@@ -1449,12 +1585,14 @@
             inventory: { NNC: 0.0, BYC: 0.0, VDT: 0.0 },
             profile: { name: 'Nathan', role: 'Gast-Zugang', level: 1, totalHacks: 0 },
             upgrades: { adBlocker: false, connectionSpeed: 1, cpuLevel: 1, ramLevel: 1, gpuLevel: 0, coolingLevel: 1 },
+            settings: { crtScanlines: false, audioFeedback: false }, // NEU: Speichert Systemeinstellungen
             hardware: { cpu: 'Basic Cyber-Core v1', gpu: 'Keine (Onboard Graphics)', ram: '4GB DDR-Synth', network: '56k Proxy-Link', cooling: 'Passiv (Defekt)' },
             market: {
                 NNC: { price: 0.5, history: Array(40).fill(0.5), trend: 0 },
                 BYC: { price: 2.5, history: Array(40).fill(2.5), trend: 0 },
                 VDT: { price: 15.0, history: Array(40).fill(15.0), trend: 0 }
             },
+            marketAlerts: [], // NEU: Speichert die User-Alarme
             marketNews: [],
             mails: [
                 { id: 1, sender: "E.V.A.", subject: "Wohnungs-Status: Kritisch", body: "Guten Tag Nathan.\n\nIch möchte Sie freundlich, aber bestimmt darauf hinweisen, dass sämtliche Möbelstücke letzte Nacht während Ihres Schlafes konfisziert wurden. \n\nIhre aktuelle Schlafgelegenheit: Synthetischer Polymer-Boden. \nGeschätzter Erholungsfaktor: 0%.\n\nDa Ihr Premium-Empathie-Paket abgelaufen ist, erspare ich mir aufbauende Worte.\nEmpfehlung: Nutzen Sie Ihr Terminal OS, um umgehend erste Credits zu generieren. Andernfalls wird der Vermieter-Konzern voraussichtlich in 48 Stunden auch Ihre Lebenserhaltung wegen Zahlungsverzug deaktivieren.\n\nGezeichnet,\nE.V.A. (Ihre Wohnungs-KI)", date: "02:04 AM", read: false },
@@ -1464,6 +1602,32 @@
             furniture: [],
             gigs: { active: null, completed: 0, available: [] },
             police: { records: [], totalFines: 0 } 
+        };
+
+        // --- GLOBALE AUDIO API FÜR FEEDBACK ---
+        let audioCtx = null;
+        const playClickSound = () => {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.type = 'sine'; // Weicher futuristischer Ton
+                oscillator.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+                
+                gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.05);
+            } catch (e) {
+                console.warn("AudioFeedback failed", e);
+            }
         };
 
         const MainGame = ({ setGameState }) => {
@@ -1485,10 +1649,12 @@
                             ...parsed,
                             gpuHeat: parsed.gpuHeat || 0,
                             upgrades: { ...DEFAULT_PLAYER_STATE.upgrades, ...(parsed.upgrades || {}) },
+                            settings: { ...DEFAULT_PLAYER_STATE.settings, ...(parsed.settings || {}) }, // NEU laden
                             hardware: { ...DEFAULT_PLAYER_STATE.hardware, ...(parsed.hardware || {}) },
                             inventory: { ...DEFAULT_PLAYER_STATE.inventory, ...(parsed.inventory || {}) },
                             profile: { ...DEFAULT_PLAYER_STATE.profile, ...(parsed.profile || {}) },
                             market: parsed.market || DEFAULT_PLAYER_STATE.market, 
+                            marketAlerts: parsed.marketAlerts || [], // NEU laden
                             marketNews: parsed.marketNews || [],
                             mails: parsed.mails && parsed.mails.length > 0 ? parsed.mails : DEFAULT_PLAYER_STATE.mails,
                             tenant: { ...DEFAULT_PLAYER_STATE.tenant, ...(parsed.tenant || {}) },
@@ -1539,7 +1705,27 @@
                             let newPrice = Math.max(0.01, currentData.price * (1 + changePct));
                             newMarket[coin] = { price: newPrice, history: [...currentData.history, newPrice].slice(-40), trend: newPrice - currentData.price };
                         });
-                        return { ...prev, market: newMarket, marketNews: newNews.slice(0, 15) };
+
+                        // NEU: Market Alerts überprüfen
+                        let currentAlerts = prev.marketAlerts || [];
+                        let alertsToKeep = [];
+                        let alertsTriggered = [];
+
+                        currentAlerts.forEach(alert => {
+                            const price = newMarket[alert.coin].price;
+                            if ((alert.condition === 'above' && price >= alert.targetPrice) ||
+                                (alert.condition === 'below' && price <= alert.targetPrice)) {
+                                alertsTriggered.push({ ...alert, currentPrice: price });
+                            } else {
+                                alertsToKeep.push(alert);
+                            }
+                        });
+
+                        if (alertsTriggered.length > 0) {
+                            window.dispatchEvent(new CustomEvent('market-alert', { detail: alertsTriggered }));
+                        }
+
+                        return { ...prev, market: newMarket, marketNews: newNews.slice(0, 15), marketAlerts: alertsToKeep };
                     });
                 }, 3000); 
 
@@ -1599,9 +1785,20 @@
                     const { gigDef, actualFine } = e.detail;
                     addNotification("NCPD ALARM", `Du wurdest bei '${gigDef.title}' erwischt! Strafe: ${actualFine.toFixed(2)} CR.`, "error");
                 };
+                const handleMarketAlert = (e) => {
+                    e.detail.forEach(alert => {
+                        addNotification("MARKET ALERT", `${alert.coin} hat ${alert.targetPrice.toFixed(2)} CR erreicht! (Kurs: ${alert.currentPrice.toFixed(2)})`, "info");
+                    });
+                };
+                
                 window.addEventListener('gig-complete', handleGigComplete);
                 window.addEventListener('gig-caught', handleGigCaught);
-                return () => { window.removeEventListener('gig-complete', handleGigComplete); window.removeEventListener('gig-caught', handleGigCaught); }
+                window.addEventListener('market-alert', handleMarketAlert); // NEU
+                return () => { 
+                    window.removeEventListener('gig-complete', handleGigComplete); 
+                    window.removeEventListener('gig-caught', handleGigCaught); 
+                    window.removeEventListener('market-alert', handleMarketAlert);
+                }
             }, []);
 
             const handleOpenApp = (appId) => {
@@ -1622,7 +1819,19 @@
             const gpuHeatColor = !hasGpu ? 'text-slate-600' : (gpuHeat >= 100 ? 'text-red-500 animate-pulse' : 'text-purple-400');
 
             return (
-                <div className="flex flex-col h-full w-full bg-slate-950 text-white font-sans relative overflow-hidden" onClick={() => isStartMenuOpen && setIsStartMenuOpen(false)}>
+                <div 
+                    className="flex flex-col h-full w-full bg-slate-950 text-white font-sans relative overflow-hidden" 
+                    onClickCapture={(e) => {
+                        // Globaler Audio-Trigger für alles was klickbar ist
+                        if (playerState.settings?.audioFeedback && (e.target.closest('button') || e.target.closest('.cursor-pointer'))) {
+                            playClickSound();
+                        }
+                    }}
+                    onClick={() => isStartMenuOpen && setIsStartMenuOpen(false)}
+                >
+                    {/* Der CRT Overlay */}
+                    {playerState.settings?.crtScanlines && <div className="crt-scanlines"></div>}
+                    
                     <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(34, 211, 238, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 211, 238, 0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
                     
                     <header className="flex justify-between items-center p-2 border-b border-cyan-900/50 z-10 bg-black/80 backdrop-blur-md relative pointer-events-none">
@@ -1733,6 +1942,17 @@
                     .animate-fog-engulf-center { animation: fogEngulfCenter 3.5s ease-in forwards; }
                     @keyframes systemFlash { 0%, 75% { opacity: 0; } 95% { opacity: 1; } 100% { opacity: 0; } }
                     .animate-system-flash { animation: systemFlash 3.5s ease-in-out forwards; }
+                    
+                    /* NEU: CRT Scanlines Filter */
+                    .crt-scanlines {
+                        position: absolute;
+                        top: 0; left: 0; right: 0; bottom: 0;
+                        z-index: 9999;
+                        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+                        background-size: 100% 2px, 3px 100%;
+                        pointer-events: none;
+                    }
+
                     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
                     .custom-scrollbar::-webkit-scrollbar-track { background: #020617; }
                     .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
